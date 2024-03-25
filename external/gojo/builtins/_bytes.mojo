@@ -1,6 +1,3 @@
-from time import now
-
-
 alias Byte = Int8
 
 
@@ -138,6 +135,12 @@ struct Bytes(Stringable, Sized, CollectionElement):
 
     fn __repr__(self) -> String:
         return self.__str__()
+    
+    fn __contains__(self, item: Int8) -> Bool:
+        for i in range(len(self)):
+            if self[i] == item:
+                return True
+        return False
 
     fn append(inout self, value: Byte):
         """Appends the value to the end of the Bytes.
@@ -146,7 +149,7 @@ struct Bytes(Stringable, Sized, CollectionElement):
             value: The value to append.
         """
         # If the vector is full, resize it.
-        if self.write_position == self.size():
+        if self.write_position >= self.size():
             self.resize(self.size() * 2)
         self[self.write_position] = value
 
