@@ -21,18 +21,21 @@ struct MojoClient(Client):
     var port: Int
     var name: String
 
+    @always_inline
     fn __init__(inout self) raises:
         self.fd = socket(AF_INET, SOCK_STREAM, 0)
         self.host = "127.0.0.1"
         self.port = 8888
         self.name = "lightbug_http_client"
 
+    @always_inline
     fn __init__(inout self, host: StringLiteral, port: Int) raises:
         self.fd = socket(AF_INET, SOCK_STREAM, 0)
         self.host = host
         self.port = port
         self.name = "lightbug_http_client"
 
+    @always_inline
     fn do(self, req: HTTPRequest) raises -> HTTPResponse:
         """
         The `do` method is responsible for sending an HTTP request to a server and receiving the corresponding response.

@@ -25,6 +25,7 @@ struct UnsafeString:
     var data: Pointer[UInt8]
     var len: Int
 
+    @always_inline
     fn __init__(str: StringLiteral) -> UnsafeString:
         var l = str.__len__()
         var s = String(str)
@@ -33,6 +34,7 @@ struct UnsafeString:
             p.store(i, s._buffer[i])
         return UnsafeString(p, l)
 
+    @always_inline
     fn __init__(str: String) -> UnsafeString:
         var l = str.__len__()
         var p = Pointer[UInt8].alloc(l)
@@ -40,6 +42,7 @@ struct UnsafeString:
             p.store(i, str._buffer[i])
         return UnsafeString(p, l)
 
+    @always_inline
     fn to_string(self) -> String:
         var s = String(self.data, self.len)
         return s

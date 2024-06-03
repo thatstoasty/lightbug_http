@@ -28,6 +28,7 @@ struct SysServer:
 
     var ln: SysListener
 
+    @always_inline
     fn __init__(inout self) raises:
         self.error_handler = ErrorHandler()
         self.name = "lightbug_http"
@@ -38,6 +39,7 @@ struct SysServer:
         self.tcp_keep_alive = False
         self.ln = SysListener()
     
+    @always_inline
     fn __init__(inout self, tcp_keep_alive: Bool) raises:
         self.error_handler = ErrorHandler()
         self.name = "lightbug_http"
@@ -48,6 +50,7 @@ struct SysServer:
         self.tcp_keep_alive = tcp_keep_alive
         self.ln = SysListener()
     
+    @always_inline
     fn __init__(inout self, own_address: String) raises:
         self.error_handler = ErrorHandler()
         self.name = "lightbug_http"
@@ -58,6 +61,7 @@ struct SysServer:
         self.tcp_keep_alive = False
         self.ln = SysListener()
 
+    @always_inline
     fn __init__(inout self, error_handler: ErrorHandler) raises:
         self.error_handler = error_handler
         self.name = "lightbug_http"
@@ -68,13 +72,16 @@ struct SysServer:
         self.tcp_keep_alive = False
         self.ln = SysListener()
     
+    @always_inline
     fn address(self) -> String:
         return self.__address
     
+    @always_inline
     fn set_address(inout self, own_address: String) -> Self:
         self.__address = own_address
         return self
 
+    @always_inline
     fn get_concurrency(self) -> Int:
         """
         Retrieve the concurrency level which is either
@@ -88,6 +95,7 @@ struct SysServer:
             concurrency = DefaultConcurrency
         return concurrency
 
+    @always_inline
     fn listen_and_serve[
         T: HTTPService
     ](inout self, address: String, handler: T) raises -> None:
@@ -103,6 +111,7 @@ struct SysServer:
         _ = self.set_address(address)
         self.serve(listener, handler)
 
+    @always_inline
     fn serve[T: HTTPService](inout self, ln: SysListener, handler: T) raises -> None:
         """
         Serve HTTP requests.

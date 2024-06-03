@@ -5,5 +5,6 @@ from lightbug_http.io.bytes import bytes
 # TODO: Custom error handlers provided by the user
 @value
 struct ErrorHandler:
+    @always_inline
     fn Error(self) -> HTTPResponse:
         return HTTPResponse(ResponseHeader(), bytes("TODO"))

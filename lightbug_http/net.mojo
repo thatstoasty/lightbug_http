@@ -104,19 +104,23 @@ struct TCPAddr(Addr):
     var port: Int
     var zone: String  # IPv6 addressing zone
 
+    @always_inline
     fn __init__(inout self):
         self.ip = String("127.0.0.1")
         self.port = 8000
         self.zone = ""
 
+    @always_inline
     fn __init__(inout self, ip: String, port: Int):
         self.ip = ip
         self.port = port
         self.zone = ""
 
+    @always_inline
     fn network(self) -> String:
         return NetworkType.tcp.value
 
+    @always_inline
     fn string(self) -> String:
         if self.zone != "":
             return join_host_port(self.ip + "%" + self.zone, self.port.__str__())
@@ -168,6 +172,7 @@ struct HostPort:
     var host: String
     var port: String
 
+    @always_inline
     fn __init__(inout self, host: String, port: String):
         self.host = host
         self.port = port

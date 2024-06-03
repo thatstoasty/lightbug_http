@@ -19,21 +19,25 @@ struct PythonTCPListener:
     var __addr: TCPAddr
     var socket: PythonObject
 
+    @always_inline
     fn __init__(inout self) raises:
         self.__pymodules = None
         self.__addr = TCPAddr("localhost", 8080)
         self.socket = None
 
+    @always_inline
     fn __init__(inout self, addr: TCPAddr) raises:
         self.__pymodules = None
         self.__addr = addr
         self.socket = None
 
+    @always_inline
     fn __init__(inout self, pymodules: PythonObject, addr: TCPAddr) raises:
         self.__pymodules = pymodules
         self.__addr = addr
         self.socket = None
 
+    @always_inline
     fn __init__(
         inout self, pymodules: PythonObject, addr: TCPAddr, socket: PythonObject
     ) raises:
@@ -42,15 +46,18 @@ struct PythonTCPListener:
         self.socket = socket
 
     @always_inline
+    @always_inline
     fn accept(self) raises -> PythonConnection:
         var conn_addr = self.socket.accept()
         return PythonConnection(self.__pymodules, conn_addr)
 
+    @always_inline
     fn close(self) raises:
         if self.socket == None:
             raise Error("socket is None, cannot close")
         _ = self.socket.close()
 
+    @always_inline
     fn addr(self) -> TCPAddr:
         return self.__addr
 
@@ -59,14 +66,17 @@ struct PythonListenConfig:
     var __pymodules: Modules
     var __keep_alive: Duration
 
+    @always_inline
     fn __init__(inout self):
         self.__keep_alive = default_tcp_keep_alive
         self.__pymodules = Modules()
 
+    @always_inline
     fn __init__(inout self, keep_alive: Duration):
         self.__keep_alive = keep_alive
         self.__pymodules = Modules()
 
+    @always_inline
     fn listen(inout self, network: String, address: String) raises -> PythonTCPListener:
         var addr = resolve_internet_addr(network, address)
         var listener = PythonTCPListener(
@@ -90,24 +100,28 @@ struct PythonConnection(Connection):
     var raddr: PythonObject
     var laddr: PythonObject
 
+    @always_inline
     fn __init__(inout self, laddr: String, raddr: String) raises:
         self.conn = None
         self.raddr = PythonObject(raddr)
         self.laddr = PythonObject(laddr)
         self.pymodules = Modules().builtins
 
+    @always_inline
     fn __init__(inout self, laddr: TCPAddr, raddr: TCPAddr) raises:
         self.conn = None
         self.raddr = PythonObject(raddr.ip + ":" + raddr.port.__str__())
         self.laddr = PythonObject(laddr.ip + ":" + laddr.port.__str__())
         self.pymodules = Modules().builtins
 
+    @always_inline
     fn __init__(inout self, pymodules: PythonObject, py_conn_addr: PythonObject) raises:
         self.conn = py_conn_addr[0]
         self.raddr = py_conn_addr[1]
         self.laddr = ""
         self.pymodules = pymodules
 
+    @always_inline
     fn read(self, inout buf: Bytes) raises -> Int:
         var data = self.conn.recv(default_buffer_size)
         buf = bytes(
@@ -115,19 +129,23 @@ struct PythonConnection(Connection):
         )
         return len(buf)
 
+    @always_inline
     fn write(self, buf: Bytes) raises -> Int:
         var data = self.pymodules.bytes(String(buf), CharSet.utf8.value)
         _ = self.conn.sendall(data)
         return len(buf)
 
+    @always_inline
     fn close(self) raises:
         _ = self.conn.close()
 
+    @always_inline
     fn local_addr(inout self) raises -> TCPAddr:
         if self.laddr.__str__() == "":
             self.laddr = self.conn.getsockname()
         return TCPAddr(self.laddr[0].__str__(), self.laddr[1].__int__())
 
+    @always_inline
     fn remote_addr(self) raises -> TCPAddr:
         return TCPAddr(self.raddr[0].__str__(), self.raddr[1].__int__())
 
@@ -135,11 +153,14 @@ struct PythonConnection(Connection):
 struct PythonNet:
     var __lc: PythonListenConfig
 
+    @always_inline
     fn __init__(inout self):
         self.__lc = PythonListenConfig(default_tcp_keep_alive)
 
+    @always_inline
     fn __init__(inout self, keep_alive: Duration) raises:
         self.__lc = PythonListenConfig(keep_alive)
 
+    @always_inline
     fn listen(inout self, network: String, addr: String) raises -> PythonTCPListener:
         return self.__lc.listen(network, addr)

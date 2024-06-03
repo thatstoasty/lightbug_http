@@ -27,6 +27,7 @@ struct PythonServer:
 
     var ln: PythonTCPListener
 
+    @always_inline
     fn __init__(inout self) raises:
         self.pymodules = Modules()
         self.error_handler = ErrorHandler()
@@ -35,6 +36,7 @@ struct PythonServer:
         self.tcp_keep_alive = False
         self.ln = PythonTCPListener()
 
+    @always_inline
     fn __init__(inout self, error_handler: ErrorHandler) raises:
         self.pymodules = Modules()
         self.error_handler = error_handler
@@ -45,12 +47,14 @@ struct PythonServer:
 
         self.ln = PythonTCPListener()
 
+    @always_inline
     fn get_concurrency(self) -> Int:
         var concurrency = self.max_concurrent_connections
         if concurrency <= 0:
             concurrency = DefaultConcurrency
         return concurrency
 
+    @always_inline
     fn listen_and_serve[
         T: HTTPService
     ](inout self, address: String, handler: T) raises -> None:
@@ -58,6 +62,7 @@ struct PythonServer:
         var listener = __net.listen(NetworkType.tcp4.value, address)
         self.serve(listener, handler)
 
+    @always_inline
     fn serve[
         T: HTTPService
     ](inout self, ln: PythonTCPListener, handler: T) raises -> None:

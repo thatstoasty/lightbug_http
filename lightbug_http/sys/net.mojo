@@ -47,6 +47,7 @@ from sys.info import os_is_macos
 from time import sleep
 
 trait AnAddrInfo:
+    @always_inline
     fn get_ip_address(self, host: String) raises -> in_addr:
         """
         TODO: Once default functions can be implemented in traits, this function should use the functions currently
@@ -89,18 +90,22 @@ struct SysListener:
     var fd: c_int
     var __addr: TCPAddr
 
+    @always_inline
     fn __init__(inout self) raises:
         self.__addr = TCPAddr("localhost", 8080)
         self.fd = socket(AF_INET, SOCK_STREAM, 0)
 
+    @always_inline
     fn __init__(inout self, addr: TCPAddr) raises:
         self.__addr = addr
         self.fd = socket(AF_INET, SOCK_STREAM, 0)
 
+    @always_inline
     fn __init__(inout self, addr: TCPAddr, fd: c_int) raises:
         self.__addr = addr
         self.fd = fd
 
+    @always_inline
     fn accept(self) raises -> SysConnection:
         var their_addr_ptr = Pointer[sockaddr].alloc(1)
         var sin_size = socklen_t(sizeof[socklen_t]())
@@ -115,12 +120,14 @@ struct SysListener:
             self.__addr, TCPAddr(peer.host, atol(peer.port)), new_sockfd
         )
 
+    @always_inline
     fn close(self) raises:
         _ = shutdown(self.fd, SHUT_RDWR)
         var close_status = close(self.fd)
         if close_status == -1:
             print("Failed to close new_sockfd")
 
+    @always_inline
     fn addr(self) -> TCPAddr:
         return self.__addr
 
@@ -128,12 +135,15 @@ struct SysListener:
 struct SysListenConfig(ListenConfig):
     var __keep_alive: Duration
 
+    @always_inline
     fn __init__(inout self) raises:
         self.__keep_alive = default_tcp_keep_alive
 
+    @always_inline
     fn __init__(inout self, keep_alive: Duration) raises:
         self.__keep_alive = keep_alive
 
+    @always_inline
     fn listen(inout self, network: String, address: String) raises -> SysListener:
         var addr = resolve_internet_addr(network, address)
         var address_family = AF_INET
@@ -200,21 +210,25 @@ struct SysConnection(Connection):
     var raddr: TCPAddr
     var laddr: TCPAddr
 
+    @always_inline
     fn __init__(inout self, laddr: String, raddr: String) raises:
         self.raddr = resolve_internet_addr(NetworkType.tcp4.value, raddr)
         self.laddr = resolve_internet_addr(NetworkType.tcp4.value, laddr)
         self.fd = socket(AF_INET, SOCK_STREAM, 0)
 
+    @always_inline
     fn __init__(inout self, laddr: TCPAddr, raddr: TCPAddr) raises:
         self.raddr = raddr
         self.laddr = laddr
         self.fd = socket(AF_INET, SOCK_STREAM, 0)
 
+    @always_inline
     fn __init__(inout self, laddr: TCPAddr, raddr: TCPAddr, fd: c_int) raises:
         self.raddr = raddr
         self.laddr = laddr
         self.fd = fd
 
+    @always_inline
     fn read(self, inout buf: Bytes) raises -> Int:
         var new_buf = Pointer[UInt8]().alloc(default_buffer_size)
         var bytes_recv = recv(self.fd, new_buf, default_buffer_size, 0)
@@ -226,25 +240,30 @@ struct SysConnection(Connection):
         buf = bytes(bytes_str)
         return bytes_recv
 
+    @always_inline
     fn write(self, msg: String) raises -> Int:
         if send(self.fd, to_char_ptr(msg).bitcast[c_void](), len(msg), 0) == -1:
             print("Failed to send response")
         return len(msg)
     
+    @always_inline
     fn write(self, buf: Bytes) raises -> Int:
         if send(self.fd, to_char_ptr(buf).bitcast[c_void](), len(buf), 0) == -1:
             print("Failed to send response")
         return len(buf)
 
+    @always_inline
     fn close(self) raises:
         _ = shutdown(self.fd, SHUT_RDWR)
         var close_status = close(self.fd)
         if close_status == -1:
             print("Failed to close new_sockfd")
 
+    @always_inline
     fn local_addr(inout self) raises -> TCPAddr:
         return self.laddr
 
+    @always_inline
     fn remote_addr(self) raises -> TCPAddr:
         return self.raddr
 
@@ -252,12 +271,15 @@ struct SysConnection(Connection):
 struct SysNet:
     var __lc: SysListenConfig
 
+    @always_inline
     fn __init__(inout self) raises:
         self.__lc = SysListenConfig(default_tcp_keep_alive)
 
+    @always_inline
     fn __init__(inout self, keep_alive: Duration) raises:
         self.__lc = SysListenConfig(keep_alive)
 
+    @always_inline
     fn listen(inout self, network: String, addr: String) raises -> SysListener:
         return self.__lc.listen(network, addr)
 
@@ -279,11 +301,13 @@ struct addrinfo_macos(AnAddrInfo):
     var ai_addr: Pointer[sockaddr]
     var ai_next: Pointer[c_void]
 
+    @always_inline
     fn __init__() -> Self:
         return Self(
             0, 0, 0, 0, 0, Pointer[c_char](), Pointer[sockaddr](), Pointer[c_void]()
         )
 
+    @always_inline
     fn get_ip_address(self, host: String) raises -> in_addr:
         """
         Returns an IP address based on the host.
@@ -345,11 +369,13 @@ struct addrinfo_unix(AnAddrInfo):
     var ai_canonname: Pointer[c_char]
     var ai_next: Pointer[c_void]
 
+    @always_inline
     fn __init__() -> Self:
         return Self(
             0, 0, 0, 0, 0, Pointer[sockaddr](), Pointer[c_char](), Pointer[c_void]()
         )
 
+    @always_inline
     fn get_ip_address(self, host: String) raises -> in_addr:
         """
         Returns an IP address based on the host.

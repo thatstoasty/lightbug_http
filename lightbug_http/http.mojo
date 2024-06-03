@@ -77,6 +77,7 @@ struct HTTPRequest(Request):
     var timeout: Duration
     var disable_redirect_path_normalization: Bool
 
+    @always_inline
     fn __init__(inout self, uri: URI):
         self.header = RequestHeader("127.0.0.1")
         self.__uri = uri
@@ -86,6 +87,7 @@ struct HTTPRequest(Request):
         self.timeout = Duration()
         self.disable_redirect_path_normalization = False
 
+    @always_inline
     fn __init__(inout self, uri: URI, headers: RequestHeader):
         self.header = headers
         self.__uri = uri
@@ -95,6 +97,7 @@ struct HTTPRequest(Request):
         self.timeout = Duration()
         self.disable_redirect_path_normalization = False
 
+    @always_inline
     fn __init__(inout self, uri: URI, buf: Bytes, headers: RequestHeader):
         self.header = headers
         self.__uri = uri
@@ -104,6 +107,7 @@ struct HTTPRequest(Request):
         self.timeout = Duration()
         self.disable_redirect_path_normalization = False
 
+    @always_inline
     fn __init__(
         inout self,
         header: RequestHeader,
@@ -122,41 +126,51 @@ struct HTTPRequest(Request):
         self.timeout = timeout
         self.disable_redirect_path_normalization = disable_redirect_path_normalization
 
+    @always_inline
     fn get_body_bytes(self: Reference[Self]) -> BytesView:
         return BytesView(unsafe_ptr=self[].body_raw.unsafe_ptr(), len=self[].body_raw.size)
 
+    @always_inline
     fn set_host(inout self, host: String) -> Self:
         _ = self.__uri.set_host(host)
         return self
 
+    @always_inline
     fn set_host_bytes(inout self, host: Bytes) -> Self:
         _ = self.__uri.set_host_bytes(host)
         return self
 
+    @always_inline
     fn host(self) -> String:
         return self.__uri.host_str()
 
+    @always_inline
     fn set_request_uri(inout self, request_uri: String) -> Self:
         _ = self.header.set_request_uri(request_uri.as_bytes())
         self.parsed_uri = False
         return self
 
+    @always_inline
     fn set_request_uri_bytes(inout self, request_uri: Bytes) -> Self:
         _ = self.header.set_request_uri_bytes(request_uri)
         return self
 
+    @always_inline
     fn request_uri(inout self) -> String:
         if self.parsed_uri:
             _ = self.set_request_uri_bytes(self.__uri.request_uri())
         return self.header.request_uri()
 
+    @always_inline
     fn uri(self) -> URI:
         return self.__uri
 
+    @always_inline
     fn set_connection_close(inout self) -> Self:
         _ = self.header.set_connection_close()
         return self
 
+    @always_inline
     fn connection_close(self) -> Bool:
         return self.header.connection_close()
 
@@ -171,6 +185,7 @@ struct HTTPResponse(Response):
     var raddr: TCPAddr
     var laddr: TCPAddr
 
+    @always_inline
     fn __init__(inout self, body_bytes: Bytes):
         self.header = ResponseHeader(
             200,
@@ -184,6 +199,7 @@ struct HTTPResponse(Response):
         self.raddr = TCPAddr()
         self.laddr = TCPAddr()
 
+    @always_inline
     fn __init__(inout self, header: ResponseHeader, body_bytes: Bytes):
         self.header = header
         self.stream_immediate_header_flush = False
@@ -193,63 +209,77 @@ struct HTTPResponse(Response):
         self.raddr = TCPAddr()
         self.laddr = TCPAddr()
     
+    @always_inline
     fn get_body_bytes(self: Reference[Self]) -> BytesView:
         return BytesView(unsafe_ptr=self[].body_raw.unsafe_ptr(), len=self[].body_raw.size)
 
+    @always_inline
     fn set_status_code(inout self, status_code: Int) -> Self:
         _ = self.header.set_status_code(status_code)
         return self
 
+    @always_inline
     fn status_code(self) -> Int:
         return self.header.status_code()
 
+    @always_inline
     fn set_connection_close(inout self) -> Self:
         _ = self.header.set_connection_close()
         return self
 
+    @always_inline
     fn connection_close(self) -> Bool:
         return self.header.connection_close()
 
+@always_inline
 fn OK(body: StringLiteral) -> HTTPResponse:
     return HTTPResponse(
         ResponseHeader(200, bytes("OK"), bytes("Content-Type: text/plain")), bytes(body),
     )
 
+@always_inline
 fn OK(body: StringLiteral, content_type: String) -> HTTPResponse:
     return HTTPResponse(
         ResponseHeader(200, bytes("OK"), bytes(content_type)), bytes(body),
     )
 
+@always_inline
 fn OK(body: String) -> HTTPResponse:
     return HTTPResponse(
         ResponseHeader(200, bytes("OK"), bytes("Content-Type: text/plain")), bytes(body),
     )
 
+@always_inline
 fn OK(body: String, content_type: String) -> HTTPResponse:
     return HTTPResponse(
         ResponseHeader(200, bytes("OK"), bytes(content_type)), bytes(body),
     )
 
+@always_inline
 fn OK(body: Bytes) -> HTTPResponse:
     return HTTPResponse(
         ResponseHeader(200, bytes("OK"), bytes("Content-Type: text/plain")), body,
     )
 
+@always_inline
 fn OK(body: Bytes, content_type: String) -> HTTPResponse:
     return HTTPResponse(
         ResponseHeader(200, bytes("OK"), bytes(content_type)), body,
     )
 
+@always_inline
 fn OK(body: Bytes, content_type: String, content_encoding: String) -> HTTPResponse:
     return HTTPResponse(
         ResponseHeader(200, bytes("OK"), bytes(content_type), bytes(content_encoding)), body,
     )
 
+@always_inline
 fn NotFound(path: String) -> HTTPResponse:
     return HTTPResponse(
         ResponseHeader(404, bytes("Not Found"), bytes("text/plain")), bytes("path " + path + " not found"),
     )
 
+@always_inline
 fn encode(req: HTTPRequest, uri: URI) raises -> StringSlice[False, ImmutableStaticLifetime]:
     var builder = StringBuilder()
 
@@ -301,6 +331,7 @@ fn encode(req: HTTPRequest, uri: URI) raises -> StringSlice[False, ImmutableStat
     return StringSlice[False, ImmutableStaticLifetime](unsafe_from_utf8_ptr=builder.render().unsafe_ptr(), len=builder.size)
 
 
+@always_inline
 fn encode(res: HTTPResponse) raises -> String:
     var current_time = String()
     try:
@@ -363,6 +394,8 @@ fn encode(res: HTTPResponse) raises -> String:
 
     return StringSlice[False, ImmutableStaticLifetime](unsafe_from_utf8_ptr=builder.render().unsafe_ptr(), len=builder.size)
 
+
+@always_inline
 fn split_http_string(buf: Bytes) raises -> (String, String, String):
     var request = String(buf)
     

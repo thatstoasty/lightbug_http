@@ -8,6 +8,7 @@ trait HTTPService:
 
 @value
 struct Printer(HTTPService):
+    @always_inline
     fn func(self, req: HTTPRequest) raises -> HTTPResponse:
         var body = req.body_raw
         print(String(body))
@@ -17,6 +18,7 @@ struct Printer(HTTPService):
 
 @value
 struct Welcome(HTTPService):
+    @always_inline
     fn func(self, req: HTTPRequest) raises -> HTTPResponse:
         var uri = req.uri()
 
@@ -37,6 +39,7 @@ struct Welcome(HTTPService):
 
 @value
 struct ExampleRouter(HTTPService):
+    @always_inline
     fn func(self, req: HTTPRequest) raises -> HTTPResponse:
         var body = req.body_raw
         var uri = req.uri()
@@ -55,6 +58,7 @@ struct ExampleRouter(HTTPService):
 
 @value
 struct TechEmpowerRouter(HTTPService):
+    @always_inline
     fn func(self, req: HTTPRequest) raises -> HTTPResponse:
         # var body = req.body_raw
         var uri = req.uri()

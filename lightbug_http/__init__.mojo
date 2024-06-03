@@ -4,5 +4,6 @@ from lightbug_http.sys.server import SysServer
 from lightbug_http.tests.run import run_tests
 
 trait DefaultConstructible:
+    @always_inline
     fn __init__(inout self) raises:
         ...

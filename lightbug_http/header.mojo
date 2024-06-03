@@ -26,6 +26,7 @@ struct RequestHeader:
     var raw_headers: Bytes
     var __trailer: Bytes
 
+    @always_inline
     fn __init__(inout self) -> None:
         self.disable_normalization = False
         self.no_http_1_1 = False
@@ -41,6 +42,7 @@ struct RequestHeader:
         self.raw_headers = Bytes()
         self.__trailer = Bytes()
 
+    @always_inline
     fn __init__(inout self, host: String) -> None:
         self.disable_normalization = False
         self.no_http_1_1 = False
@@ -56,6 +58,7 @@ struct RequestHeader:
         self.raw_headers = Bytes()
         self.__trailer = Bytes()
 
+    @always_inline
     fn __init__(inout self, rawheaders: Bytes) -> None:
         self.disable_normalization = False
         self.no_http_1_1 = False
@@ -71,6 +74,7 @@ struct RequestHeader:
         self.raw_headers = rawheaders
         self.__trailer = Bytes()
 
+    @always_inline
     fn __init__(
         inout self,
         disable_normalization: Bool,
@@ -101,114 +105,142 @@ struct RequestHeader:
         self.raw_headers = raw_headers
         self.__trailer = trailer
 
+    @always_inline
     fn set_content_type(inout self, content_type: String) -> Self:
         self.__content_type = bytes(content_type)
         return self
 
+    @always_inline
     fn set_content_type_bytes(inout self, content_type: Bytes) -> Self:
         self.__content_type = content_type
         return self
 
+    @always_inline
     fn content_type(self: Reference[Self]) -> BytesView:
         return BytesView(unsafe_ptr=self[].__content_type.unsafe_ptr(), len=self[].__content_type.size)
 
+    @always_inline
     fn set_host(inout self, host: String) -> Self:
         self.__host = bytes(host)
         return self
 
+    @always_inline
     fn set_host_bytes(inout self, host: Bytes) -> Self:
         self.__host = host
         return self
 
+    @always_inline
     fn host(self: Reference[Self]) -> BytesView:
         return BytesView(unsafe_ptr=self[].__host.unsafe_ptr(), len=self[].__host.size)
 
+    @always_inline
     fn set_user_agent(inout self, user_agent: String) -> Self:
         self.__user_agent = bytes(user_agent)
         return self
 
+    @always_inline
     fn set_user_agent_bytes(inout self, user_agent: Bytes) -> Self:
         self.__user_agent = user_agent
         return self
 
+    @always_inline
     fn user_agent(self: Reference[Self]) -> BytesView:
         return BytesView(unsafe_ptr=self[].__user_agent.unsafe_ptr(), len=self[].__user_agent.size)
 
+    @always_inline
     fn set_method(inout self, method: String) -> Self:
         self.__method = bytes(method)
         return self
 
+    @always_inline
     fn set_method_bytes(inout self, method: Bytes) -> Self:
         self.__method = method
         return self
 
+    @always_inline
     fn method(self: Reference[Self]) -> BytesView:
         if len(self[].__method) == 0:
             return strMethodGet.as_bytes_slice()
         return BytesView(unsafe_ptr=self[].__method.unsafe_ptr(), len=self[].__method.size)
     
+    @always_inline
     fn set_protocol(inout self, proto: String) -> Self:
         self.no_http_1_1 = False # hardcoded until HTTP/2 is supported
         self.proto = bytes(proto)
         return self
 
+    @always_inline
     fn set_protocol_bytes(inout self, proto: Bytes) -> Self:
         self.no_http_1_1 = False # hardcoded until HTTP/2 is supported
         self.proto = proto
         return self
 
+    @always_inline
     fn protocol_str(self) -> String:
         if len(self.proto) == 0:
             return strHttp11
         return String(self.proto)
 
+    @always_inline
     fn protocol(self: Reference[Self]) -> BytesView:
         if len(self[].proto) == 0:
             return strHttp11.as_bytes_slice()
         return BytesView(unsafe_ptr=self[].proto.unsafe_ptr(), len=self[].proto.size)
     
+    @always_inline
     fn content_length(self) -> Int:
         return self.__content_length
 
+    @always_inline
     fn set_content_length(inout self, content_length: Int) -> Self:
         self.__content_length = content_length
         return self
 
+    @always_inline
     fn set_content_length_bytes(inout self, content_length: Bytes) -> Self:
         self.__content_length_bytes = content_length
         return self
 
+    @always_inline
     fn set_request_uri(inout self, request_uri: String) -> Self:
         self.__request_uri = request_uri.as_bytes_slice()
         return self
 
+    @always_inline
     fn set_request_uri_bytes(inout self, request_uri: Bytes) -> Self:
         self.__request_uri = request_uri
         return self
 
+    @always_inline
     fn request_uri(self: Reference[Self]) -> BytesView:
         if len(self[].__request_uri) <= 1:
             return BytesView(unsafe_ptr=strSlash.as_bytes_slice().unsafe_ptr(), len=2)
         return BytesView(unsafe_ptr=self[].__request_uri.unsafe_ptr(), len=self[].__request_uri.size)
 
+    @always_inline
     fn set_trailer(inout self, trailer: String) -> Self:
         self.__trailer = bytes(trailer)
         return self
 
+    @always_inline
     fn set_trailer_bytes(inout self, trailer: Bytes) -> Self:
         self.__trailer = trailer
         return self
     
+    @always_inline
     fn trailer(self: Reference[Self]) -> BytesView:
         return BytesView(unsafe_ptr=self[].__trailer.unsafe_ptr(), len=self[].__trailer.size)
     
+    @always_inline
     fn trailer_str(self) -> String:
         return String(self.trailer())
 
+    @always_inline
     fn set_connection_close(inout self) -> Self:
         self.__connection_close = True
         return self
 
+    @always_inline
     fn reset_connection_close(inout self) -> Self:
         if self.__connection_close == False:
             return self
@@ -216,12 +248,15 @@ struct RequestHeader:
             self.__connection_close = False
             return self
 
+    @always_inline
     fn connection_close(self) -> Bool:
         return self.__connection_close
 
+    @always_inline
     fn headers(self) -> String:
         return String(self.raw_headers)
     
+    @always_inline
     fn parse_first_line(inout self, request_line: String) raises -> None:
         var n = request_line.find(" ")
         if n <= 0:
@@ -248,6 +283,7 @@ struct RequestHeader:
         # Now process the rest of the headers
         _ = self.set_content_length(-2)
 
+    @always_inline
     fn parse_from_list(inout self, headers: List[String], request_line: String) raises -> None:
         _ = self.parse_first_line(request_line)
 
@@ -263,6 +299,7 @@ struct RequestHeader:
             if len(key) > 0:
                 self.parse_header(key, value)
 
+    @always_inline
     fn parse_raw(inout self, request_line: String) raises -> None:
         var headers = self.raw_headers
         _ = self.parse_first_line(request_line)
@@ -274,6 +311,7 @@ struct RequestHeader:
             if len(s.key) > 0:
                 self.parse_header(s.key, s.value)
     
+    @always_inline
     fn parse_header(inout self, key: String, value: String) raises -> None:
         # The below is based on the code from Golang's FastHTTP library
         # Spaces between the header key and colon not allowed; RFC 7230, 3.2.4.
@@ -333,6 +371,7 @@ struct ResponseHeader:
     var __trailer: Bytes
     var raw_headers: Bytes
 
+    @always_inline
     fn __init__(
         inout self,
     ) -> None:
@@ -350,6 +389,7 @@ struct ResponseHeader:
         self.__trailer = Bytes()
         self.raw_headers = Bytes()
     
+    @always_inline
     fn __init__(
         inout self,
         raw_headers: Bytes,
@@ -368,6 +408,7 @@ struct ResponseHeader:
         self.__trailer = Bytes()
         self.raw_headers = raw_headers
 
+    @always_inline
     fn __init__(
         inout self,
         status_code: Int,
@@ -388,6 +429,7 @@ struct ResponseHeader:
         self.__trailer = Bytes()
         self.raw_headers = Bytes()
     
+    @always_inline
     fn __init__(
         inout self,
         status_code: Int,
@@ -409,6 +451,7 @@ struct ResponseHeader:
         self.__trailer = Bytes()
         self.raw_headers = Bytes()
 
+    @always_inline
     fn __init__(
         inout self,
         connection_close: Bool,
@@ -430,6 +473,7 @@ struct ResponseHeader:
         self.__trailer = Bytes()
         self.raw_headers = Bytes()
 
+    @always_inline
     fn __init__(
         inout self,
         disable_normalization: Bool,
@@ -459,107 +503,134 @@ struct ResponseHeader:
         self.__trailer = trailer
         self.raw_headers = Bytes()
 
+    @always_inline
     fn set_status_code(inout self, code: Int) -> Self:
         self.__status_code = code
         return self
 
+    @always_inline
     fn status_code(self) -> Int:
         if self.__status_code == 0:
             return statusOK
         return self.__status_code
 
+    @always_inline
     fn set_status_message(inout self, message: Bytes) -> Self:
         self.__status_message = message
         return self
     
+    @always_inline
     fn status_message(self: Reference[Self]) -> BytesView:
         return BytesView(unsafe_ptr=self[].__status_message.unsafe_ptr(), len=self[].__status_message.size)
     
+    @always_inline
     fn status_message_str(self) -> String:
         return String(self.status_message())
 
+    @always_inline
     fn content_type(self: Reference[Self]) -> BytesView:
         return BytesView(unsafe_ptr=self[].__content_type.unsafe_ptr(), len=self[].__content_type.size)
 
+    @always_inline
     fn set_content_type(inout self, content_type: String) -> Self:
         self.__content_type = bytes(content_type)
         return self
 
+    @always_inline
     fn set_content_type_bytes(inout self, content_type: Bytes) -> Self:
         self.__content_type = content_type
         return self
 
+    @always_inline
     fn content_encoding(self: Reference[Self]) -> BytesView:
         return BytesView(unsafe_ptr=self[].__content_encoding.unsafe_ptr(), len=self[].__content_encoding.size)
 
+    @always_inline
     fn set_content_encoding(inout self, content_encoding: String) -> Self:
         self.__content_encoding = bytes(content_encoding)
         return self
 
+    @always_inline
     fn set_content_encoding_bytes(inout self, content_encoding: Bytes) -> Self:
         self.__content_encoding = content_encoding
         return self
     
+    @always_inline
     fn content_length(self) -> Int:
         return self.__content_length
     
+    @always_inline
     fn set_content_length(inout self, content_length: Int) -> Self:
         self.__content_length = content_length
         return self
     
+    @always_inline
     fn set_content_length_bytes(inout self, content_length: Bytes) -> Self:
         self.__content_length_bytes = content_length
         return self
 
+    @always_inline
     fn server(self: Reference[Self]) -> BytesView:
         return BytesView(unsafe_ptr=self[].__server.unsafe_ptr(), len=self[].__server.size)
 
+    @always_inline
     fn set_server(inout self, server: String) -> Self:
         self.__server = bytes(server)
         return self
 
+    @always_inline
     fn set_server_bytes(inout self, server: Bytes) -> Self:
         self.__server = server
         return self
 
+    @always_inline
     fn set_protocol(inout self, proto: String) -> Self:
         self.no_http_1_1 = False # hardcoded until HTTP/2 is supported
         self.__protocol = bytes(proto)
         return self
     
+    @always_inline
     fn set_protocol_bytes(inout self, protocol: Bytes) -> Self:
         self.no_http_1_1 = False # hardcoded until HTTP/2 is supported
         self.__protocol = protocol
         return self
 
+    @always_inline
     fn protocol_str(self) -> String:
         if len(self.__protocol) == 0:
             return strHttp11
         return String(self.__protocol)
     
+    @always_inline
     fn protocol(self: Reference[Self]) -> BytesView:
         if len(self[].__protocol) == 0:
             return strHttp11.as_bytes_slice()
         return BytesView(unsafe_ptr=self[].__protocol.unsafe_ptr(), len=self[].__protocol.size)
 
+    @always_inline
     fn set_trailer(inout self, trailer: String) -> Self:
         self.__trailer = bytes(trailer)
         return self
 
+    @always_inline
     fn set_trailer_bytes(inout self, trailer: Bytes) -> Self:
         self.__trailer = trailer
         return self
     
+    @always_inline
     fn trailer(self: Reference[Self]) -> BytesView:
         return BytesView(unsafe_ptr=self[].__trailer.unsafe_ptr(), len=self[].__trailer.size)
 
+    @always_inline
     fn trailer_str(self) -> String:
         return String(self.trailer())
     
+    @always_inline
     fn set_connection_close(inout self) -> Self:
         self.__connection_close = True
         return self
 
+    @always_inline
     fn reset_connection_close(inout self) -> Self:
         if self.__connection_close == False:
             return self
@@ -567,12 +638,15 @@ struct ResponseHeader:
             self.__connection_close = False
             return self
 
+    @always_inline
     fn connection_close(self) -> Bool:
         return self.__connection_close
 
+    @always_inline
     fn headers(self) -> String:
         return String(self.raw_headers)
 
+    @always_inline
     fn parse_first_line(inout self, first_line: String) raises -> None:
         var n = first_line.find(" ")
         
@@ -591,6 +665,7 @@ struct ResponseHeader:
         
         _ = self.set_content_length(-2)
 
+    @always_inline
     fn parse_from_list(inout self, headers: List[String], first_line: String) raises -> None:
         _ = self.parse_first_line(first_line)
 
@@ -606,6 +681,7 @@ struct ResponseHeader:
             if len(key) > 0:
                 self.parse_header(key, value)
 
+    @always_inline
     fn parse_raw(inout self, first_line: String) raises -> None:
         var headers = self.raw_headers
         
@@ -619,6 +695,7 @@ struct ResponseHeader:
             if len(s.key) > 0:
                 self.parse_header(s.key, s.value)
     
+    @always_inline
     fn parse_header(inout self, key: String, value: String) raises -> None:
         # The below is based on the code from Golang's FastHTTP library
         # Spaces between header key and colon not allowed (RFC 7230, 3.2.4)
@@ -666,6 +743,7 @@ struct headerScanner:
     var next_line: Int
     var initialized: Bool
 
+    @always_inline
     fn __init__(inout self) -> None:
         self.b = ""
         self.key = ""
@@ -677,6 +755,7 @@ struct headerScanner:
         self.next_line = 0
         self.initialized = False
     
+    @always_inline
     fn next(inout self) -> Bool:
         if not self.initialized:
             self.initialized = True

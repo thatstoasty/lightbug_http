@@ -13,6 +13,7 @@ struct PythonClient(Client):
     var host: StringLiteral
     var port: Int
 
+    @always_inline
     fn __init__(inout self) raises:
         self.pymodules = Modules()
         self.socket = self.pymodules.socket.socket()
@@ -20,6 +21,7 @@ struct PythonClient(Client):
         self.port = 8888
         self.name = "lightbug_http_client"
 
+    @always_inline
     fn __init__(inout self, host: StringLiteral, port: Int) raises:
         self.pymodules = Modules()
         self.socket = self.pymodules.socket.socket()
@@ -27,6 +29,7 @@ struct PythonClient(Client):
         self.port = port
         self.name = "lightbug_http_client"
 
+    @always_inline
     fn do(self, req: HTTPRequest) raises -> HTTPResponse:
         var uri = req.uri()
         try:
