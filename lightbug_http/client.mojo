@@ -14,7 +14,6 @@ from lightbug_http.http import HTTPRequest, HTTPResponse, encode
 from lightbug_http.header import Headers, HeaderKey
 from lightbug_http.net import create_connection, SysConnection
 from lightbug_http.io.bytes import Bytes
-from lightbug_http.utils import ByteReader
 from collections import Dict
 
 
@@ -122,8 +121,9 @@ struct Client:
             if cached_connection:
                 return self.do(req^)
             raise Error("No response received")
+            
         try:
-            var res = HTTPResponse.from_bytes(new_buf^, conn)
+            var res = HTTPResponse.from_bytes(new_buf, conn)
             if res.is_redirect():
                 self._close_conn(host_str)
                 return self._handle_redirect(req^, res^)

@@ -100,13 +100,13 @@ struct Headers(Writable, Stringable):
                 r.increment()
             # TODO (bgreni): Handle possible trailing whitespace
             var value = r.read_line()
-            var k = to_string(key^).lower()
+            var k = to_string(key).lower()
             if k == HeaderKey.SET_COOKIE:
-                cookies.append(to_string(value^))
+                cookies.append(to_string(value))
                 continue
 
-            self._inner[k] = to_string(value^)
-        return (to_string(first^), to_string(second^), to_string(third^), cookies)
+            self._inner[k] = to_string(value)
+        return (to_string(first), to_string(second), to_string(third), cookies)
 
     fn write_to[T: Writer](self, mut writer: T):
         for header in self._inner.items():

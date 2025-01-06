@@ -179,7 +179,7 @@ struct Server:
                     is_closed = True
                 break
 
-            var request = HTTPRequest.from_bytes(self.address(), max_request_body_size, b^)
+            var request = HTTPRequest.from_bytes(self.address(), max_request_body_size, b)
 
             var res: HTTPResponse
             try:

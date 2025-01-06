@@ -1,3 +1,4 @@
+from memory import Span
 from benchmark import *
 from lightbug_http.io.bytes import bytes, Bytes
 from lightbug_http.header import Headers, Header
@@ -135,7 +136,7 @@ fn lightbug_benchmark_header_parse(mut b: Bencher):
         try:
             var b = headers
             var header = Headers()
-            var reader = ByteReader(b^)
+            var reader = ByteReader(Span(b))
             _ = header.parse_raw(reader)
         except:
             print("failed")
