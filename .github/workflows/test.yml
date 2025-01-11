@@ -16,5 +16,3 @@ jobs:
           source $HOME/.bash_profile
           magic run test
           magic run integration_test
-          magic run integration_tests
-
