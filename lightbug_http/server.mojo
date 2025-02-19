@@ -141,7 +141,9 @@ struct Server(Movable):
             # If we completely fill the buffer haven't read the full request, we end up processing a partial request.
             var b = Bytes(capacity=default_buffer_size)
             try:
-                _ = conn.read(b)
+                bytes_read = conn.read(b)
+                logger.debug("Bytes read:", bytes_read)
+                logger.debug("Raw request:", String(b))
             except e:
                 conn.teardown()
                 # 0 bytes were read from the peer, which indicates their side of the connection was closed.
