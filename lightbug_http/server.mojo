@@ -1,6 +1,6 @@
 from memory import Span
 from lightbug_http.io.sync import Duration
-from lightbug_http.io.bytes import Bytes, bytes, ByteReader
+from lightbug_http.io.bytes import Bytes, BytesConstant, ByteView, ByteReader, bytes
 from lightbug_http.address import NetworkType
 from lightbug_http._logger import logger
 from lightbug_http.connection import NoTLSListener, default_buffer_size, TCPConnection, ListenConfig
@@ -112,20 +112,8 @@ struct Server(Movable):
         while True:
             var conn = ln.accept()
             self.serve_connection(conn, handler)
-
+    
     fn serve_connection[T: HTTPService](mut self, mut conn: TCPConnection, mut handler: T) raises -> None:
-        """Serve a single connection.
-
-        Parameters:
-            T: The type of HTTPService that handles incoming requests.
-
-        Args:
-            conn: A connection object that represents a client connection.
-            handler: An object that handles incoming HTTP requests.
-
-        Raises:
-            If there is an error while serving the connection.
-        """
         logger.debug(
             "Connection accepted! IP:", conn.socket._remote_address.ip, "Port:", conn.socket._remote_address.port
         )
@@ -137,64 +125,72 @@ struct Server(Movable):
         while True:
             req_number += 1
 
-            # TODO: We should read until 0 bytes are received. (@thatstoasty)
-            # If we completely fill the buffer haven't read the full request, we end up processing a partial request.
-            var b = Bytes(capacity=default_buffer_size)
-            try:
-                bytes_read = conn.read(b)
-                logger.debug("Bytes read:", bytes_read)
-                logger.debug("Raw request:", String(b))
-            except e:
-                conn.teardown()
-                # 0 bytes were read from the peer, which indicates their side of the connection was closed.
-                if String(e) == "EOF":
-                    break
-                else:
-                    logger.error(e)
-                    raise Error("Server.serve_connection: Failed to read request")
+            var request_buffer = Bytes()
+            
+            while True:
+                try:
+                    var temp_buffer = Bytes(capacity=default_buffer_size)
+                    var bytes_read = conn.read(temp_buffer)
+                    logger.debug("Bytes read:", bytes_read)
+                    
+                    if bytes_read == 0:
+                        conn.teardown()
+                        return
+                    
+                    request_buffer.extend(temp_buffer[:bytes_read])
+                    logger.debug("Total buffer size:", len(request_buffer))
+                    
+                    if BytesConstant.DOUBLE_CRLF in ByteView(request_buffer):
+                        logger.debug("Found end of headers")
+                        break
+                    
+                except e:
+                    conn.teardown()
+                    if String(e) == "EOF":
+                        return
+                    else:
+                        logger.error(e)
+                        raise Error("Server.serve_connection: Failed to read request")
 
             var request: HTTPRequest
             try:
-                request = HTTPRequest.from_bytes(self.address(), max_request_body_size, b)
+                request = HTTPRequest.from_bytes(self.address(), max_request_body_size, request_buffer)
             except e:
-                logger.error(e)
+                logger.error("Parse error:", String(e))
                 raise Error("Server.serve_connection: Failed to parse request")
 
             var response: HTTPResponse
+            var close_connection = (not self.tcp_keep_alive) or request.connection_close()
             try:
                 response = handler.func(request)
+                if close_connection:
+                    response.set_connection_close()
+                logger.debug(
+                    conn.socket._remote_address.ip,
+                    String(conn.socket._remote_address.port),
+                    request.method,
+                    request.uri.path,
+                    response.status_code,
+                )
+                try:
+                    _ = conn.write(encode(response^))
+                except e:
+                    logger.error("Write error:", String(e))
+                    conn.teardown()
+                    break
+
+                if close_connection:
+                    conn.teardown()
+                    break
             except e:
-                logger.error("Unexpected error in the handler:", e)
+                logger.error("Handler error:", String(e))
 
                 if not conn.is_closed():
-                    # Try to send back an internal server error, but always attempt to teardown the connection.
                     try:
-                        # TODO: Move InternalError response to an alias when Mojo can support Dict operations at compile time. (@thatstoasty)
                         _ = conn.write(encode(InternalError()))
                     except e:
                         raise Error("Failed to send InternalError response")
                     finally:
                         conn.teardown()
-                return
+                    return
 
-            # If the server is set to not support keep-alive connections, or the client requests a connection close, we mark the connection to be closed.
-            var close_connection = (not self.tcp_keep_alive) or request.connection_close()
-            if close_connection:
-                response.set_connection_close()
-
-            logger.debug(
-                conn.socket._remote_address.ip,
-                String(conn.socket._remote_address.port),
-                request.method,
-                request.uri.path,
-                response.status_code,
-            )
-            try:
-                _ = conn.write(encode(response^))
-            except e:
-                conn.teardown()
-                break
-
-            if close_connection:
-                conn.teardown()
-                break

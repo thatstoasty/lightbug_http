@@ -1,7 +1,8 @@
 import requests
 
-print("\n~~~ Testing redirect ~~~")
 session = requests.Session()
+
+print("\n~~~ Testing redirect ~~~")
 response = session.get('http://127.0.0.1:8080/redirect', allow_redirects=True)
 assert response.status_code == 200
 assert response.text == "yay you made it"
@@ -17,6 +18,8 @@ assert response.status_code == 500
 
 print("\n~~~ Testing large headers ~~~")
 large_headers = {
-    f'X-Custom-Header-{i}': 'value' * 100
-    for i in range(7)
+    f'X-Custom-Header-{i}': 'value' * 100  # long value
+    for i in range(8)  # minimum number to exceed default buffer size (4096)
 }
+response = session.get('http://127.0.0.1:8080/large-headers', headers=large_headers)
+assert response.status_code == 200

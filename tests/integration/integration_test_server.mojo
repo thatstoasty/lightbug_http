@@ -15,6 +15,8 @@ struct IntegrationTestService(HTTPService):
             return OK("yay you made it")
         elif p == "/close-connection":
             return OK("connection closed")
+        elif p == "/large-headers":
+            return OK("alright")
         elif p == "/error":
             raise Error("oops")
 

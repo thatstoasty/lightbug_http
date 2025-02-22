@@ -23,12 +23,14 @@ alias whitespace_byte = ord(whitespace)
 alias tab = "\t"
 alias tab_byte = ord(tab)
 
-
 struct BytesConstant:
     alias whitespace = byte(whitespace)
     alias colon = byte(colonChar)
     alias rChar = byte(rChar)
     alias nChar = byte(nChar)
+    
+    alias CRLF = bytes(lineBreak)
+    alias DOUBLE_CRLF = bytes(lineBreak + lineBreak)
 
 
 fn to_string[T: Writable](value: T) -> String:
