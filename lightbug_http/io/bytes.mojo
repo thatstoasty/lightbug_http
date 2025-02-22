@@ -113,14 +113,11 @@ struct ByteView[origin: Origin](Testable):
         return False
     
     fn __contains__(self, b: Bytes) -> Bool:
-        # If the search pattern is longer than the text, it can't be contained
         if len(b) > len(self._inner):
             return False
         
-        # For each possible starting position in self._inner
         for i in range(len(self._inner) - len(b) + 1):
             var found = True
-            # Check if the pattern matches starting at position i
             for j in range(len(b)):
                 if self._inner[i + j] != b[j]:
                     found = False
