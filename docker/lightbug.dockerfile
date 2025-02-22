@@ -2,7 +2,7 @@ FROM ghcr.io/modular/magic:latest
 
 RUN apt-get update && apt-get install -y git
 
-RUN git clone -b fix/docker-crash https://github.com/Lightbug-HQ/lightbug_http
+RUN git clone https://github.com/Lightbug-HQ/lightbug_http
 
 WORKDIR /lightbug_http
 
