@@ -114,6 +114,15 @@ struct Server(Movable):
             self.serve_connection(conn, handler)
     
     fn serve_connection[T: HTTPService](mut self, mut conn: TCPConnection, mut handler: T) raises -> None:
+        """Serve a single connection.
+        Parameters:
+            T: The type of HTTPService that handles incoming requests.
+        Args:
+            conn: A connection object that represents a client connection.
+            handler: An object that handles incoming HTTP requests.
+        Raises:
+            If there is an error while serving the connection.
+        """
         logger.debug(
             "Connection accepted! IP:", conn.socket._remote_address.ip, "Port:", conn.socket._remote_address.port
         )
@@ -137,7 +146,7 @@ struct Server(Movable):
                         conn.teardown()
                         return
                     
-                    request_buffer.extend(temp_buffer[:bytes_read])
+                    request_buffer.extend(temp_buffer^)
                     logger.debug("Total buffer size:", len(request_buffer))
                     
                     if BytesConstant.DOUBLE_CRLF in ByteView(request_buffer):
@@ -146,6 +155,7 @@ struct Server(Movable):
                     
                 except e:
                     conn.teardown()
+                    # 0 bytes were read from the peer, which indicates their side of the connection was closed.
                     if String(e) == "EOF":
                         return
                     else:
@@ -156,7 +166,7 @@ struct Server(Movable):
             try:
                 request = HTTPRequest.from_bytes(self.address(), max_request_body_size, request_buffer)
             except e:
-                logger.error("Parse error:", String(e))
+                logger.error("Failed to parse HTTPRequest:", String(e))
                 raise Error("Server.serve_connection: Failed to parse request")
 
             var response: HTTPResponse
@@ -175,7 +185,7 @@ struct Server(Movable):
                 try:
                     _ = conn.write(encode(response^))
                 except e:
-                    logger.error("Write error:", String(e))
+                    logger.error("Failed to write encoded response to the connection:", String(e))
                     conn.teardown()
                     break
 
