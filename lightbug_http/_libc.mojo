@@ -353,7 +353,7 @@ fn htonl(hostlong: c_uint) -> c_uint:
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/htonl.3p.html.
+    * Reference: https://man7.org/linux/man-pages/man3/htonl.3p.html .
     """
     return external_call["htonl", c_uint, c_uint](hostlong)
 
@@ -373,7 +373,7 @@ fn htons(hostshort: c_ushort) -> c_ushort:
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/htonl.3p.html.
+    * Reference: https://man7.org/linux/man-pages/man3/htonl.3p.html .
     """
     return external_call["htons", c_ushort, c_ushort](hostshort)
 
@@ -393,7 +393,7 @@ fn ntohl(netlong: c_uint) -> c_uint:
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/htonl.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/htonl.3p.html .
     """
     return external_call["ntohl", c_uint, c_uint](netlong)
 
@@ -413,7 +413,7 @@ fn ntohs(netshort: c_ushort) -> c_ushort:
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/htonl.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/htonl.3p.html .
     """
     return external_call["ntohs", c_ushort, c_ushort](netshort)
 
@@ -441,7 +441,7 @@ fn _inet_ntop(
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/inet_ntop.3p.html.
+    * Reference: https://man7.org/linux/man-pages/man3/inet_ntop.3p.html .
     """
     return external_call[
         "inet_ntop",
@@ -479,7 +479,7 @@ fn inet_ntop[
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/inet_ntop.3p.html.
+    * Reference: https://man7.org/linux/man-pages/man3/inet_ntop.3p.html .
     """
     constrained[
         Int(address_family) in [AF_INET, AF_INET6], "Address family must be either INET_ADDRSTRLEN or INET6_ADDRSTRLEN."
@@ -537,7 +537,7 @@ fn _inet_pton(af: c_int, src: UnsafePointer[c_char], dst: UnsafePointer[c_void])
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/inet_ntop.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/inet_ntop.3p.html .
     """
     return external_call[
         "inet_pton",
@@ -570,7 +570,7 @@ fn inet_pton[address_family: Int32](src: UnsafePointer[c_char]) raises -> c_uint
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/inet_ntop.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/inet_ntop.3p.html .
     * This function is valid for `AF_INET` and `AF_INET6`.
     """
     constrained[Int(address_family) in [AF_INET, AF_INET6], "Address family must be either AF_INET or AF_INET6."]()
@@ -609,7 +609,7 @@ fn _socket(domain: c_int, type: c_int, protocol: c_int) -> c_int:
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/socket.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/socket.3p.html .
     """
     return external_call["socket", c_int, c_int, c_int, c_int](domain, type, protocol)
 
@@ -641,7 +641,7 @@ fn socket(domain: c_int, type: c_int, protocol: c_int) raises -> c_int:
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/socket.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/socket.3p.html .
     """
     var fd = _socket(domain, type, protocol)
     if fd == -1:
@@ -707,7 +707,7 @@ fn _setsockopt[
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/setsockopt.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/setsockopt.3p.html .
     """
     return external_call[
         "setsockopt",
@@ -748,7 +748,7 @@ fn setsockopt(
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/setsockopt.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/setsockopt.3p.html .
     """
     var result = _setsockopt(socket, level, option_name, Pointer.address_of(option_value), sizeof[Int]())
     if result == -1:
@@ -796,7 +796,7 @@ fn _getsockopt[
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/setsockopt.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/setsockopt.3p.html .
     """
     return external_call[
         "getsockopt",
@@ -838,7 +838,7 @@ fn getsockopt(
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/getsockopt.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/getsockopt.3p.html .
     """
     var option_value = stack_allocation[1, c_void]()
     var option_len: socklen_t = sizeof[Int]()
@@ -882,7 +882,7 @@ fn _getsockname[
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/getsockname.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/getsockname.3p.html .
     """
     return external_call[
         "getsockname",
@@ -917,7 +917,7 @@ fn getsockname[
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/getsockname.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/getsockname.3p.html .
     """
     var result = _getsockname(socket, address, address_len)
     if result == -1:
@@ -957,7 +957,7 @@ fn _getpeername[
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man2/getpeername.2.html
+    * Reference: https://man7.org/linux/man-pages/man2/getpeername.2.html .
     """
     return external_call[
         "getpeername",
@@ -989,7 +989,7 @@ fn getpeername(file_descriptor: c_int) raises -> sockaddr_in:
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man2/getpeername.2.html
+    * Reference: https://man7.org/linux/man-pages/man2/getpeername.2.html .
     """
     var remote_address = stack_allocation[1, sockaddr]()
     var result = _getpeername(file_descriptor, remote_address, Pointer.address_of(socklen_t(sizeof[sockaddr]())))
@@ -1033,7 +1033,7 @@ fn _bind[origin: MutableOrigin](socket: c_int, address: Pointer[sockaddr_in, ori
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/bind.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/bind.3p.html .
     """
     return external_call["bind", c_int, c_int, Pointer[sockaddr_in, origin], socklen_t](socket, address, address_len)
 
@@ -1071,7 +1071,7 @@ fn bind(socket: c_int, mut address: sockaddr_in) raises:
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/bind.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/bind.3p.html .
     """
     var result = _bind(socket, Pointer.address_of(address), sizeof[sockaddr_in]())
     if result == -1:
@@ -1129,7 +1129,7 @@ fn _listen(socket: c_int, backlog: c_int) -> c_int:
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/listen.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/listen.3p.html .
     """
     return external_call["listen", c_int, c_int, c_int](socket, backlog)
 
@@ -1154,7 +1154,7 @@ fn listen(socket: c_int, backlog: c_int) raises:
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/listen.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/listen.3p.html .
     """
     var result = _listen(socket, backlog)
     if result == -1:
@@ -1190,7 +1190,7 @@ fn _accept[
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/accept.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/accept.3p.html .
     """
     return external_call[
         "accept", c_int, c_int, Pointer[sockaddr, address_origin], Pointer[socklen_t, len_origin]  # FnName, RetType
@@ -1227,7 +1227,7 @@ fn accept(socket: c_int) raises -> c_int:
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/accept.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/accept.3p.html .
     """
     var remote_address = sockaddr()
     var result = _accept(socket, Pointer.address_of(remote_address), Pointer.address_of(socklen_t(sizeof[socklen_t]())))
@@ -1293,7 +1293,7 @@ fn _connect[origin: Origin](socket: c_int, address: Pointer[sockaddr_in, origin]
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/connect.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/connect.3p.html .
     """
     return external_call["connect", c_int](socket, address, address_len)
 
@@ -1328,7 +1328,7 @@ fn connect(socket: c_int, address: sockaddr_in) raises:
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/connect.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/connect.3p.html .
     """
     var result = _connect(socket, Pointer.address_of(address), sizeof[sockaddr_in]())
     if result == -1:
@@ -1402,7 +1402,7 @@ fn _recv(
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/recv.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/recv.3p.html .
     """
     return external_call[
         "recv",
@@ -1437,7 +1437,7 @@ fn recv(
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/recv.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/recv.3p.html .
     """
     var result = _recv(socket, buffer, length, flags)
     if result == -1:
@@ -1504,7 +1504,7 @@ fn _recvfrom[
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/recvfrom.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/recvfrom.3p.html .
     * Valid Flags:
         * `MSG_PEEK`: Peeks at an incoming message. The data is treated as unread and the next recvfrom() or similar function shall still return this data.
         * `MSG_OOB`: Requests out-of-band data. The significance and semantics of out-of-band data are protocol-specific.
@@ -1550,7 +1550,7 @@ fn recvfrom(
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/recvfrom.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/recvfrom.3p.html .
     * Valid Flags:
         * `MSG_PEEK`: Peeks at an incoming message. The data is treated as unread and the next recvfrom() or similar function shall still return this data.
         * `MSG_OOB`: Requests out-of-band data. The significance and semantics of out-of-band data are protocol-specific.
@@ -1610,7 +1610,7 @@ fn _send(socket: c_int, buffer: UnsafePointer[c_void], length: c_size_t, flags: 
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/send.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/send.3p.html .
     """
     return external_call["send", c_ssize_t](socket, buffer, length, flags)
 
@@ -1652,7 +1652,7 @@ fn send(socket: c_int, buffer: UnsafePointer[c_void], length: c_size_t, flags: c
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/send.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/send.3p.html .
     """
     var result = _send(socket, buffer, length, flags)
     if result == -1:
@@ -1746,7 +1746,7 @@ fn _sendto(
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/sendto.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/sendto.3p.html .
     * Valid Flags:
         * `MSG_EOR`: Terminates a record (if supported by the protocol).
         * `MSG_OOB`: Sends out-of-band data on sockets that support out-of-band data. The significance and semantics of out-of-band data are protocol-specific.
@@ -1804,7 +1804,7 @@ fn sendto(
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/sendto.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/sendto.3p.html .
     * Valid Flags:
         * `MSG_EOR`: Terminates a record (if supported by the protocol).
         * `MSG_OOB`: Sends out-of-band data on sockets that support out-of-band data. The significance and semantics of out-of-band data are protocol-specific.
@@ -1880,7 +1880,7 @@ fn _shutdown(socket: c_int, how: c_int) -> c_int:
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/shutdown.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/shutdown.3p.html .
     """
     return external_call["shutdown", c_int, c_int, c_int](socket, how)
 
@@ -1911,7 +1911,7 @@ fn shutdown(socket: c_int, how: c_int) raises:
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/shutdown.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/shutdown.3p.html .
     """
     var result = _shutdown(socket, how)
     if result == -1:
@@ -1946,7 +1946,7 @@ fn gai_strerror(ecode: c_int) -> UnsafePointer[c_char]:
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/gai_strerror.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/gai_strerror.3p.html .
     """
     return external_call["gai_strerror", UnsafePointer[c_char], c_int](ecode)
 
@@ -1973,7 +1973,7 @@ fn _close(fildes: c_int) -> c_int:
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/close.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/close.3p.html .
     """
     return external_call["close", c_int, c_int](fildes)
 
@@ -2006,7 +2006,7 @@ fn close(file_descriptor: c_int) raises:
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/close.3p.html
+    * Reference: https://man7.org/linux/man-pages/man3/close.3p.html .
     """
     if _close(file_descriptor) == -1:
         var errno = get_errno()

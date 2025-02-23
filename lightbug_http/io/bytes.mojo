@@ -111,11 +111,11 @@ struct ByteView[origin: Origin](Testable):
             if self._inner[i] == b:
                 return True
         return False
-    
+
     fn __contains__(self, b: Bytes) -> Bool:
         if len(b) > len(self._inner):
             return False
-        
+
         for i in range(len(self._inner) - len(b) + 1):
             var found = True
             for j in range(len(b)):
@@ -158,18 +158,17 @@ struct ByteView[origin: Origin](Testable):
             if self[i] != other[i]:
                 return False
         return True
-    
+
     fn __eq__(self, other: Bytes) -> Bool:
         # Check if lengths match
         if len(self) != len(other):
             return False
-        
+
         # Compare each byte
         for i in range(len(self)):
             if self[i] != other[i]:
                 return False
         return True
-
 
     fn __ne__(self, other: Self) -> Bool:
         return not self == other

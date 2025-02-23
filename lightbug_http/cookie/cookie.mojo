@@ -134,7 +134,9 @@ struct Cookie(CollectionElement):
             if v:
                 header_value.write(Cookie.SEPERATOR, Cookie.EXPIRES, Cookie.EQUAL, v.value())
         if self.max_age:
-            header_value.write(Cookie.SEPERATOR, Cookie.MAX_AGE, Cookie.EQUAL, String(self.max_age.value().total_seconds))
+            header_value.write(
+                Cookie.SEPERATOR, Cookie.MAX_AGE, Cookie.EQUAL, String(self.max_age.value().total_seconds)
+            )
         if self.domain:
             header_value.write(Cookie.SEPERATOR, Cookie.DOMAIN, Cookie.EQUAL, self.domain.value())
         if self.path:

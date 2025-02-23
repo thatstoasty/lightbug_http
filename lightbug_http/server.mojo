@@ -112,7 +112,7 @@ struct Server(Movable):
         while True:
             var conn = ln.accept()
             self.serve_connection(conn, handler)
-    
+
     fn serve_connection[T: HTTPService](mut self, mut conn: TCPConnection, mut handler: T) raises -> None:
         """Serve a single connection.
         Parameters:
@@ -135,24 +135,24 @@ struct Server(Movable):
             req_number += 1
 
             var request_buffer = Bytes()
-            
+
             while True:
                 try:
                     var temp_buffer = Bytes(capacity=default_buffer_size)
                     var bytes_read = conn.read(temp_buffer)
                     logger.debug("Bytes read:", bytes_read)
-                    
+
                     if bytes_read == 0:
                         conn.teardown()
                         return
-                    
+
                     request_buffer.extend(temp_buffer^)
                     logger.debug("Total buffer size:", len(request_buffer))
-                    
+
                     if BytesConstant.DOUBLE_CRLF in ByteView(request_buffer):
                         logger.debug("Found end of headers")
                         break
-                    
+
                 except e:
                     conn.teardown()
                     # 0 bytes were read from the peer, which indicates their side of the connection was closed.
@@ -203,4 +203,3 @@ struct Server(Movable):
                     finally:
                         conn.teardown()
                     return
-
