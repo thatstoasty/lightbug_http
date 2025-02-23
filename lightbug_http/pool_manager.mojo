@@ -42,7 +42,14 @@ struct PoolKey(Hashable, KeyElement):
 
     fn write_to[W: Writer, //](self, mut writer: W) -> None:
         writer.write(
-            "PoolKey(", "scheme=", repr(self.scheme.value), ", host=", repr(self.host), ", port=", String(self.port), ")"
+            "PoolKey(",
+            "scheme=",
+            repr(self.scheme.value),
+            ", host=",
+            repr(self.host),
+            ", port=",
+            String(self.port),
+            ")",
         )
 
 

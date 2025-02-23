@@ -477,7 +477,9 @@ struct Socket[AddrType: Addr, address_family: Int = AF_INET](Representable, Stri
             except e:
                 logger.error(e)
                 raise Error(
-                    "Socket.send_all: Failed to send message, wrote" + String(total_bytes_sent) + "bytes before failing."
+                    "Socket.send_all: Failed to send message, wrote"
+                    + String(total_bytes_sent)
+                    + "bytes before failing."
                 )
 
             total_bytes_sent += sent

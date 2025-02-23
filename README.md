@@ -49,18 +49,18 @@ The only hard dependency for `lightbug_http` is Mojo.
 Learn how to get up and running with Mojo on the [Modular website](https://www.modular.com/max/mojo).
 Once you have a Mojo project set up locally,
 
-1. Add the `modular-community` channel to your `mojoproject.toml`, e.g:
+1. Add the `mojo-community` channel to your `mojoproject.toml`, e.g:
 
    ```toml
    [project]
-   channels = ["conda-forge", "https://conda.modular.com/max", "https://repo.prefix.dev/modular-community"]
+   channels = ["conda-forge", "https://conda.modular.com/max", "https://repo.prefix.dev/mojo-community"]
    ```
 
 2. Add `lightbug_http` as a dependency:
 
    ```toml
    [dependencies]
-   lightbug_http = ">=0.1.12"
+   lightbug_http = ">=0.1.13"
    ```
 
 3. Run `magic install` at the root of your project, where `mojoproject.toml` is located

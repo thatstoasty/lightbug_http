@@ -30,6 +30,9 @@ struct BytesConstant:
     alias rChar = byte(rChar)
     alias nChar = byte(nChar)
 
+    alias CRLF = bytes(lineBreak)
+    alias DOUBLE_CRLF = bytes(lineBreak + lineBreak)
+
 
 fn to_string[T: Writable](value: T) -> String:
     return String.write(value)
