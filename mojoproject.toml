@@ -25,7 +25,7 @@ bench_server = { cmd = "bash scripts/bench_server.sh" }
 
 [dependencies]
 max = ">=25.1.0,<26"
-small_time = "==0.0.2"
+small_time = "==0.1.8"
 
 [feature.integration-tests.dependencies]
 requests = ">=2.32.3,<3"
