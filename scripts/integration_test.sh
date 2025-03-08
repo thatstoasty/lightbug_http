@@ -36,4 +36,4 @@ test_client() {
 }
 
 test_server
-# test_client
+test_client
