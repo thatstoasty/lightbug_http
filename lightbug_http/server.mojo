@@ -6,7 +6,7 @@ from lightbug_http._logger import logger
 from lightbug_http.connection import NoTLSListener, default_buffer_size, TCPConnection, ListenConfig
 from lightbug_http.socket import Socket
 from lightbug_http.http import HTTPRequest, encode
-from lightbug_http.http.common_response import InternalError
+from lightbug_http.http.common_response import InternalError, BadRequest
 from lightbug_http.uri import URI
 from lightbug_http.header import Headers
 from lightbug_http.service import HTTPService
@@ -159,47 +159,50 @@ struct Server(Movable):
                     if String(e) == "EOF":
                         return
                     else:
-                        logger.error(e)
-                        raise Error("Server.serve_connection: Failed to read request")
+                        logger.error("Server.serve_connection: Failed to read request. Expected EOF, got:", String(e))
+                        return
 
             var request: HTTPRequest
             try:
                 request = HTTPRequest.from_bytes(self.address(), max_request_body_size, request_buffer)
+                var response: HTTPResponse
+                var close_connection = (not self.tcp_keep_alive) or request.connection_close()
+                try:
+                    response = handler.func(request)
+                    if close_connection:
+                        response.set_connection_close()
+                    logger.debug(
+                        conn.socket._remote_address.ip,
+                        String(conn.socket._remote_address.port),
+                        request.method,
+                        request.uri.path,
+                        response.status_code,
+                    )
+                    try:
+                        _ = conn.write(encode(response^))
+                    except e:
+                        logger.error("Failed to write encoded response to the connection:", String(e))
+                        conn.teardown()
+                        break
+
+                    if close_connection:
+                        conn.teardown()
+                        break
+                except e:
+                    logger.error("Handler error:", String(e))
+                    if not conn.is_closed():
+                        try:
+                            _ = conn.write(encode(InternalError()))
+                        except e:
+                            raise Error("Failed to send InternalError response")
+                        finally:
+                            conn.teardown()
+                        return
             except e:
                 logger.error("Failed to parse HTTPRequest:", String(e))
-                raise Error("Server.serve_connection: Failed to parse request")
-
-            var response: HTTPResponse
-            var close_connection = (not self.tcp_keep_alive) or request.connection_close()
-            try:
-                response = handler.func(request)
-                if close_connection:
-                    response.set_connection_close()
-                logger.debug(
-                    conn.socket._remote_address.ip,
-                    String(conn.socket._remote_address.port),
-                    request.method,
-                    request.uri.path,
-                    response.status_code,
-                )
                 try:
-                    _ = conn.write(encode(response^))
+                    _ = conn.write(encode(BadRequest()))
                 except e:
-                    logger.error("Failed to write encoded response to the connection:", String(e))
+                    logger.error("Failed to write BadRequest response to the connection:", String(e))
                     conn.teardown()
                     break
-
-                if close_connection:
-                    conn.teardown()
-                    break
-            except e:
-                logger.error("Handler error:", String(e))
-
-                if not conn.is_closed():
-                    try:
-                        _ = conn.write(encode(InternalError()))
-                    except e:
-                        raise Error("Failed to send InternalError response")
-                    finally:
-                        conn.teardown()
-                    return

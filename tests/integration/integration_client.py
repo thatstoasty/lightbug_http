@@ -1,4 +1,6 @@
 import requests
+import socket
+import time
 
 session = requests.Session()
 
@@ -23,3 +25,16 @@ large_headers = {
 }
 response = session.get('http://127.0.0.1:8080/large-headers', headers=large_headers)
 assert response.status_code == 200
+
+print("\n~~~ Testing content-length mismatch (smaller) ~~~")
+def test_content_length_smaller():
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect(('127.0.0.1', 8080))
+    s.sendall(b'POST / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 100\r\n\r\nOnly sending 20 bytes')
+    time.sleep(1)
+    s.close()
+
+test_content_length_smaller()
+time.sleep(1)
+
+print("\n~~~ All tests completed ~~~")
