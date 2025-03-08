@@ -5,7 +5,9 @@ from lightbug_http import *
 struct IntegrationTestService(HTTPService):
     fn func(mut self, req: HTTPRequest) raises -> HTTPResponse:
         var p = req.uri.path
-        if p == "/redirect":
+        if p == "/":
+            return OK("hello")
+        elif p == "/redirect":
             return HTTPResponse(
                 "get off my lawn".as_bytes(),
                 headers=Headers(Header(HeaderKey.LOCATION, "/rd-destination")),

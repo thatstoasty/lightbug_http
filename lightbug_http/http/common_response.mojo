@@ -41,3 +41,11 @@ fn InternalError() -> HTTPResponse:
         headers=Headers(Header(HeaderKey.CONTENT_TYPE, "text/plain")),
         status_text="Internal Server Error",
     )
+
+fn BadRequest() -> HTTPResponse:
+    return HTTPResponse(
+        bytes("Bad Request"),
+        status_code=400,
+        headers=Headers(Header(HeaderKey.CONTENT_TYPE, "text/plain")),
+        status_text="Bad Request",
+    )
