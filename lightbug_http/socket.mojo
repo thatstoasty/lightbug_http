@@ -35,10 +35,9 @@ from lightbug_http._libc import (
     in_addr,
     SHUT_RDWR,
     SOL_SOCKET,
-    AF_INET,
-    AF_INET6,
+    AddressFamily,
+    AddressLength,
     SOCK_STREAM,
-    INET_ADDRSTRLEN,
     SO_REUSEADDR,
     SO_RCVTIMEO,
     CloseInvalidDescriptorError,
@@ -60,7 +59,9 @@ from lightbug_http._logger import logger
 alias SocketClosedError = "Socket: Socket is already closed"
 
 
-struct Socket[AddrType: Addr, address_family: Int = AF_INET](Representable, Stringable, Writable):
+struct Socket[AddrType: Addr, address_family: AddressFamily = AddressFamily.AF_INET](
+    Representable, Stringable, Writable
+):
     """Represents a network file descriptor. Wraps around a file descriptor and provides network functions.
 
     Args:
@@ -106,7 +107,7 @@ struct Socket[AddrType: Addr, address_family: Int = AF_INET](Representable, Stri
         """
         self.socket_type = socket_type
         self.protocol = protocol
-        self.fd = socket(address_family, socket_type, 0)
+        self.fd = socket(address_family.value, socket_type, 0)
         self._local_address = local_address
         self._remote_address = remote_address
         self._closed = False
@@ -188,7 +189,7 @@ struct Socket[AddrType: Addr, address_family: Int = AF_INET](Representable, Stri
     fn write_to[W: Writer, //](self, mut writer: W):
         @parameter
         fn af() -> String:
-            if address_family == AF_INET:
+            if address_family == AddressFamily.AF_INET:
                 return "AF_INET"
             else:
                 return "AF_INET6"
@@ -314,7 +315,7 @@ struct Socket[AddrType: Addr, address_family: Int = AF_INET](Representable, Stri
             raise Error("ListenConfig.listen: Failed to convert IP address to binary form.")
 
         var local_address = sockaddr_in(
-            address_family=address_family,
+            address_family=Int(address_family.value),
             port=port,
             binary_ip=binary_ip,
         )
@@ -433,7 +434,7 @@ struct Socket[AddrType: Addr, address_family: Int = AF_INET](Representable, Stri
         else:
             ip = addrinfo_unix().get_ip_address(address)
 
-        var addr = sockaddr_in(address_family=address_family, port=port, binary_ip=ip.s_addr)
+        var addr = sockaddr_in(address_family=Int(address_family.value), port=port, binary_ip=ip.s_addr)
         try:
             connect(self.fd, addr)
         except e:
@@ -507,7 +508,7 @@ struct Socket[AddrType: Addr, address_family: Int = AF_INET](Representable, Stri
         else:
             ip = addrinfo_unix().get_ip_address(address)
 
-        var addr = sockaddr_in(address_family=address_family, port=port, binary_ip=ip.s_addr)
+        var addr = sockaddr_in(address_family=Int(address_family.value), port=port, binary_ip=ip.s_addr)
         bytes_sent = sendto(self.fd, src.unsafe_ptr(), len(src), 0, UnsafePointer.address_of(addr).bitcast[sockaddr]())
 
         return bytes_sent
@@ -526,15 +527,15 @@ struct Socket[AddrType: Addr, address_family: Int = AF_INET](Representable, Stri
             EOF: If 0 bytes are received, return EOF.
         """
         var bytes_received: Int
-        var size = buffer.size
+        var size = len(buffer)
         try:
             bytes_received = recv(
                 self.fd,
                 buffer.unsafe_ptr().offset(size),
-                buffer.capacity - buffer.size,
+                buffer.capacity - len(buffer),
                 0,
             )
-            buffer.size += bytes_received
+            buffer._len += bytes_received
         except e:
             logger.error(e)
             raise Error("Socket.receive: Failed to read data from connection.")
@@ -588,11 +589,11 @@ struct Socket[AddrType: Addr, address_family: Int = AF_INET](Representable, Stri
         var remote_address = stack_allocation[1, sockaddr]()
         var bytes_received: UInt
         try:
-            var size = buffer.size
+            var size = len(buffer)
             bytes_received = recvfrom(
-                self.fd, buffer.unsafe_ptr().offset(size), buffer.capacity - buffer.size, 0, remote_address
+                self.fd, buffer.unsafe_ptr().offset(size), buffer.capacity - len(buffer), 0, remote_address
             )
-            buffer.size += bytes_received
+            buffer._len += bytes_received
         except e:
             logger.error(e)
             raise Error("Socket._receive_from: Failed to read data from connection.")

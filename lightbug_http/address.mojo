@@ -12,16 +12,13 @@ from lightbug_http._libc import (
     sockaddr,
     sockaddr_in,
     socklen_t,
-    AF_INET,
-    AF_INET6,
-    AF_UNSPEC,
+    AddressFamily,
+    AddressLength,
     SOCK_STREAM,
     ntohs,
     inet_ntop,
     socket,
     gai_strerror,
-    INET_ADDRSTRLEN,
-    INET6_ADDRSTRLEN,
 )
 
 alias MAX_PORT = 65535
@@ -159,11 +156,11 @@ struct TCPAddr[network: NetworkType = NetworkType.tcp4](Addr):
     @always_inline
     fn address_family(self) -> Int:
         if network == NetworkType.tcp4:
-            return AF_INET
+            return Int(AddressFamily.AF_INET.value)
         elif network == NetworkType.tcp6:
-            return AF_INET6
+            return Int(AddressFamily.AF_INET6.value)
         else:
-            return AF_UNSPEC
+            return Int(AddressFamily.AF_UNSPEC.value)
 
     @always_inline
     fn is_v4(self) -> Bool:
@@ -219,12 +216,12 @@ struct UDPAddr[network: NetworkType = NetworkType.udp4](Addr):
 
     @always_inline
     fn address_family(self) -> Int:
-        if network == NetworkType.udp4:
-            return AF_INET
-        elif network == NetworkType.udp6:
-            return AF_INET6
+        if network == NetworkType.tcp4:
+            return Int(AddressFamily.AF_INET.value)
+        elif network == NetworkType.tcp6:
+            return Int(AddressFamily.AF_INET6.value)
         else:
-            return AF_UNSPEC
+            return Int(AddressFamily.AF_UNSPEC.value)
 
     @always_inline
     fn is_v4(self) -> Bool:
@@ -301,7 +298,7 @@ struct addrinfo_macos(AnAddrInfo):
             The IP address.
         """
         var result = UnsafePointer[Self]()
-        var hints = Self(ai_flags=0, ai_family=AF_INET, ai_socktype=SOCK_STREAM, ai_protocol=0)
+        var hints = Self(ai_flags=0, ai_family=AddressFamily.AF_INET.value, ai_socktype=SOCK_STREAM, ai_protocol=0)
         try:
             getaddrinfo(host, String(), hints, result)
         except e:
@@ -361,7 +358,7 @@ struct addrinfo_unix(AnAddrInfo):
             The IP address.
         """
         var result = UnsafePointer[Self]()
-        var hints = Self(ai_flags=0, ai_family=AF_INET, ai_socktype=SOCK_STREAM, ai_protocol=0)
+        var hints = Self(ai_flags=0, ai_family=AddressFamily.AF_INET.value, ai_socktype=SOCK_STREAM, ai_protocol=0)
         try:
             getaddrinfo(host, String(), hints, result)
         except e:
@@ -530,7 +527,7 @@ fn binary_port_to_int(port: UInt16) -> Int:
     return Int(ntohs(port))
 
 
-fn binary_ip_to_string[address_family: Int32](owned ip_address: UInt32) raises -> String:
+fn binary_ip_to_string[address_family: AddressFamily](owned ip_address: UInt32) raises -> String:
     """Convert a binary IP address to a string by calling `inet_ntop`.
 
     Parameters:
@@ -542,23 +539,26 @@ fn binary_ip_to_string[address_family: Int32](owned ip_address: UInt32) raises -
     Returns:
         The IP address as a string.
     """
-    constrained[Int(address_family) in [AF_INET, AF_INET6], "Address family must be either AF_INET or AF_INET6."]()
+    constrained[
+        address_family in [AddressFamily.AF_INET, AddressFamily.AF_INET6],
+        "Address family must be either AF_INET or AF_INET6.",
+    ]()
     var ip: String
 
     @parameter
-    if address_family == AF_INET:
-        ip = inet_ntop[address_family, INET_ADDRSTRLEN](ip_address)
+    if address_family == AddressFamily.AF_INET:
+        ip = inet_ntop[address_family, AddressLength.INET_ADDRSTRLEN](ip_address)
     else:
-        ip = inet_ntop[address_family, INET6_ADDRSTRLEN](ip_address)
+        ip = inet_ntop[address_family, AddressLength.INET6_ADDRSTRLEN](ip_address)
 
     return ip
 
 
 fn _getaddrinfo[
-    T: AnAddrInfo, hints_origin: MutableOrigin, result_origin: MutableOrigin, //
+    T: AnAddrInfo, hints_origin: ImmutableOrigin, result_origin: MutableOrigin, //
 ](
-    nodename: UnsafePointer[c_char],
-    servname: UnsafePointer[c_char],
+    nodename: UnsafePointer[c_char, mut=False],
+    servname: UnsafePointer[c_char, mut=False],
     hints: Pointer[T, hints_origin],
     res: Pointer[UnsafePointer[T], result_origin],
 ) -> c_int:
@@ -584,8 +584,8 @@ fn _getaddrinfo[
     return external_call[
         "getaddrinfo",
         c_int,  # FnName, RetType
-        UnsafePointer[c_char],
-        UnsafePointer[c_char],
+        UnsafePointer[c_char, mut=False],
+        UnsafePointer[c_char, mut=False],
         Pointer[T, hints_origin],  # Args
         Pointer[UnsafePointer[T], result_origin],  # Args
     ](nodename, servname, hints, res)
@@ -593,7 +593,7 @@ fn _getaddrinfo[
 
 fn getaddrinfo[
     T: AnAddrInfo, //
-](node: String, service: String, mut hints: T, mut res: UnsafePointer[T],) raises:
+](node: String, service: String, hints: T, mut res: UnsafePointer[T],) raises:
     """Libc POSIX `getaddrinfo` function.
 
     Args:

@@ -108,92 +108,187 @@ alias socklen_t = c_uint
 alias in_addr_t = c_uint
 alias in_port_t = c_ushort
 
+
 # TODO: These might vary on each platform...we should confirm this.
 # Taken from: https://github.com/openbsd/src/blob/master/sys/sys/socket.h#L250
 # Address Family Constants
-alias AF_UNSPEC = 0  # unspecified
-alias AF_UNIX = 1  # local to host
-alias AF_LOCAL = AF_UNIX  # draft POSIX compatibility
-alias AF_INET = 2  # internetwork: UDP, TCP, etc.
-alias AF_IMPLINK = 3  # arpanet imp addresses
-alias AF_PUP = 4  # pup protocols: e.g. BSP
-alias AF_CHAOS = 5  # mit CHAOS protocols
-alias AF_NS = 6  # XEROX NS protocols
-alias AF_ISO = 7  # ISO protocols
-alias AF_OSI = AF_ISO
-alias AF_ECMA = 8  # european computer manufacturers
-alias AF_DATAKIT = 9  # datakit protocols
-alias AF_CCITT = 10  # CCITT protocols, X.25 etc
-alias AF_SNA = 11  # IBM SNA
-alias AF_DECnet = 12  # DECnet
-alias AF_DLI = 13  # DEC Direct data link interface
-alias AF_LAT = 14  # LAT
-alias AF_HYLINK = 15  # NSC Hyperchannel
-alias AF_APPLETALK = 16  # Apple Talk
-alias AF_ROUTE = 17  # Internal Routing Protocol
-alias AF_LINK = 18  # Link layer interface
-alias pseudo_AF_XTP = 19  # eXpress Transfer Protocol (no AF)
-alias AF_COIP = 20  # connection-oriented IP, aka ST II
-alias AF_CNT = 21  # Computer Network Technology
-alias pseudo_AF_RTIP = 22  # Help Identify RTIP packets
-alias AF_IPX = 23  # Novell Internet Protocol
-alias AF_INET6 = 24  # IPv6
-alias pseudo_AF_PIP = 25  # Help Identify PIP packets
-alias AF_ISDN = 26  # Integrated Services Digital Network
-alias AF_E164 = AF_ISDN  # CCITT E.164 recommendation
-alias AF_NATM = 27  # native ATM access
-alias AF_ENCAP = 28
-alias AF_SIP = 29  # Simple Internet Protocol
-alias AF_KEY = 30
-alias pseudo_AF_HDRCMPLT = 31  # Used by BPF to not rewrite headers in interface output routine
-alias AF_BLUETOOTH = 32  # Bluetooth
-alias AF_MPLS = 33  # MPLS
-alias pseudo_AF_PFLOW = 34  # pflow
-alias pseudo_AF_PIPEX = 35  # PIPEX
-alias AF_FRAME = 36  # frame (Ethernet) sockets
-alias AF_MAX = 37
+@value
+@register_passable("trivial")
+struct AddressFamily:
+    var value: Int32
+    alias AF_UNSPEC = Self(0)
+    """unspecified"""
+    alias AF_UNIX = Self(1)
+    """local to host"""
+    alias AF_LOCAL = Self.AF_UNIX
+    """draft POSIX compatibility"""
+    alias AF_INET = Self(2)
+    """internetwork: UDP, TCP, etc."""
+    alias AF_IMPLINK = Self(3)
+    """arpanet imp addresses"""
+    alias AF_PUP = Self(4)
+    """pup protocols: e.g. BSP"""
+    alias AF_CHAOS = Self(5)
+    """mit CHAOS protocols"""
+    alias AF_NS = Self(6)
+    """XEROX NS protocols"""
+    alias AF_ISO = Self(7)
+    """ISO protocols"""
+    alias AF_OSI = Self.AF_ISO
+    alias AF_ECMA = Self(8)
+    """european computer manufacturers"""
+    alias AF_DATAKIT = Self(9)
+    """datakit protocols"""
+    alias AF_CCITT = Self(10)
+    """CCITT protocols, X.25 etc"""
+    alias AF_SNA = Self(11)
+    """IBM SNA"""
+    alias AF_DECnet = Self(12)
+    """DECnet"""
+    alias AF_DLI = Self(13)
+    """DEC Direct data link interface"""
+    alias AF_LAT = Self(14)
+    """LAT"""
+    alias AF_HYLINK = Self(15)
+    """NSC Hyperchannel"""
+    alias AF_APPLETALK = Self(16)
+    """Apple Talk"""
+    alias AF_ROUTE = Self(17)
+    """Internal Routing Protocol"""
+    alias AF_LINK = Self(18)
+    """Link layer interface"""
+    alias pseudo_AF_XTP = Self(19)
+    """eXpress Transfer Protocol (no AF)"""
+    alias AF_COIP = Self(20)
+    """connection-oriented IP, aka ST II"""
+    alias AF_CNT = Self(21)
+    """Computer Network Technology"""
+    alias pseudo_AF_RTIP = Self(22)
+    """Help Identify RTIP packets"""
+    alias AF_IPX = Self(23)
+    """Novell Internet Protocol"""
+    alias AF_INET6 = Self(24)
+    """IPv6"""
+    alias pseudo_AF_PIP = Self(25)
+    """Help Identify PIP packets"""
+    alias AF_ISDN = Self(26)
+    """Integrated Services Digital Network"""
+    alias AF_E164 = Self.AF_ISDN
+    """CCITT E.164 recommendation"""
+    alias AF_NATM = Self(27)
+    """native ATM access"""
+    alias AF_ENCAP = Self(28)
+    alias AF_SIP = Self(29)
+    """Simple Internet Protocol"""
+    alias AF_KEY = Self(30)
+    alias pseudo_AF_HDRCMPLT = Self(31)
+    """Used by BPF to not rewrite headers in interface output routine"""
+    alias AF_BLUETOOTH = Self(32)
+    """Bluetooth"""
+    alias AF_MPLS = Self(33)
+    """MPLS"""
+    alias pseudo_AF_PFLOW = Self(34)
+    """pflow"""
+    alias pseudo_AF_PIPEX = Self(35)
+    """PIPEX"""
+    alias AF_FRAME = Self(36)
+    """frame (Ethernet) sockets"""
+    alias AF_MAX = Self(37)
+
+    fn __eq__(self, other: Self) -> Bool:
+        """Compares two `AddressFamily` instances for equality.
+
+        Args:
+            other: The other `AddressFamily` instance to compare to.
+
+        Returns:
+            True if the two instances are equal, False otherwise.
+        """
+        return self.value == other.value
+
+    fn __ne__(self, other: Self) -> Bool:
+        """Compares two `AddressFamily` instances for inequality.
+
+        Args:
+            other: The other `AddressFamily` instance to compare to.
+
+        Returns:
+            True if the two instances are not equal, False otherwise.
+        """
+        return self.value != other.value
+
+
+@value
+@register_passable("trivial")
+struct AddressLength:
+    var value: Int
+    alias INET_ADDRSTRLEN = Self(16)
+    alias INET6_ADDRSTRLEN = Self(46)
+
+    fn __eq__(self, other: Self) -> Bool:
+        """Compares two `AddressLength` instances for equality.
+
+        Args:
+            other: The other `AddressLength` instance to compare to.
+
+        Returns:
+            True if the two instances are equal, False otherwise.
+        """
+        return self.value == other.value
+
+    fn __ne__(self, other: Self) -> Bool:
+        """Compares two `AddressLength` instances for inequality.
+
+        Args:
+            other: The other `AddressLength` instance to compare to.
+
+        Returns:
+            True if the two instances are not equal, False otherwise.
+        """
+        return self.value != other.value
+
 
 # Protocol families, same as address families for now.
-alias PF_UNSPEC = AF_UNSPEC
-alias PF_LOCAL = AF_LOCAL
-alias PF_UNIX = AF_UNIX
-alias PF_INET = AF_INET
-alias PF_IMPLINK = AF_IMPLINK
-alias PF_PUP = AF_PUP
-alias PF_CHAOS = AF_CHAOS
-alias PF_NS = AF_NS
-alias PF_ISO = AF_ISO
-alias PF_OSI = AF_ISO
-alias PF_ECMA = AF_ECMA
-alias PF_DATAKIT = AF_DATAKIT
-alias PF_CCITT = AF_CCITT
-alias PF_SNA = AF_SNA
-alias PF_DECnet = AF_DECnet
-alias PF_DLI = AF_DLI
-alias PF_LAT = AF_LAT
-alias PF_HYLINK = AF_HYLINK
-alias PF_APPLETALK = AF_APPLETALK
-alias PF_ROUTE = AF_ROUTE
-alias PF_LINK = AF_LINK
-alias PF_XTP = pseudo_AF_XTP  # really just proto family, no AF
-alias PF_COIP = AF_COIP
-alias PF_CNT = AF_CNT
-alias PF_IPX = AF_IPX  # same format as = AF_NS
-alias PF_INET6 = AF_INET6
-alias PF_RTIP = pseudo_AF_RTIP  # same format as AF_INET
-alias PF_PIP = pseudo_AF_PIP
-alias PF_ISDN = AF_ISDN
-alias PF_NATM = AF_NATM
-alias PF_ENCAP = AF_ENCAP
-alias PF_SIP = AF_SIP
-alias PF_KEY = AF_KEY
-alias PF_BPF = pseudo_AF_HDRCMPLT
-alias PF_BLUETOOTH = AF_BLUETOOTH
-alias PF_MPLS = AF_MPLS
-alias PF_PFLOW = pseudo_AF_PFLOW
-alias PF_PIPEX = pseudo_AF_PIPEX
-alias PF_FRAME = AF_FRAME
-alias PF_MAX = AF_MAX
+alias PF_UNSPEC = AddressFamily.AF_UNSPEC
+alias PF_LOCAL = AddressFamily.AF_LOCAL
+alias PF_UNIX = AddressFamily.AF_UNIX
+alias PF_INET = AddressFamily.AF_INET
+alias PF_IMPLINK = AddressFamily.AF_IMPLINK
+alias PF_PUP = AddressFamily.AF_PUP
+alias PF_CHAOS = AddressFamily.AF_CHAOS
+alias PF_NS = AddressFamily.AF_NS
+alias PF_ISO = AddressFamily.AF_ISO
+alias PF_OSI = AddressFamily.AF_ISO
+alias PF_ECMA = AddressFamily.AF_ECMA
+alias PF_DATAKIT = AddressFamily.AF_DATAKIT
+alias PF_CCITT = AddressFamily.AF_CCITT
+alias PF_SNA = AddressFamily.AF_SNA
+alias PF_DECnet = AddressFamily.AF_DECnet
+alias PF_DLI = AddressFamily.AF_DLI
+alias PF_LAT = AddressFamily.AF_LAT
+alias PF_HYLINK = AddressFamily.AF_HYLINK
+alias PF_APPLETALK = AddressFamily.AF_APPLETALK
+alias PF_ROUTE = AddressFamily.AF_ROUTE
+alias PF_LINK = AddressFamily.AF_LINK
+alias PF_XTP = AddressFamily.pseudo_AF_XTP  # really just proto family, no AF
+alias PF_COIP = AddressFamily.AF_COIP
+alias PF_CNT = AddressFamily.AF_CNT
+alias PF_IPX = AddressFamily.AF_IPX  # same format as = AddressFamily.AF_NS
+alias PF_INET6 = AddressFamily.AF_INET6
+alias PF_RTIP = AddressFamily.pseudo_AF_RTIP  # same format as AF_INET
+alias PF_PIP = AddressFamily.pseudo_AF_PIP
+alias PF_ISDN = AddressFamily.AF_ISDN
+alias PF_NATM = AddressFamily.AF_NATM
+alias PF_ENCAP = AddressFamily.AF_ENCAP
+alias PF_SIP = AddressFamily.AF_SIP
+alias PF_KEY = AddressFamily.AF_KEY
+alias PF_BPF = AddressFamily.pseudo_AF_HDRCMPLT
+alias PF_BLUETOOTH = AddressFamily.AF_BLUETOOTH
+alias PF_MPLS = AddressFamily.AF_MPLS
+alias PF_PFLOW = AddressFamily.pseudo_AF_PFLOW
+alias PF_PIPEX = AddressFamily.pseudo_AF_PIPEX
+alias PF_FRAME = AddressFamily.AF_FRAME
+alias PF_MAX = AddressFamily.AF_MAX
 
 # Socket Type constants
 alias SOCK_STREAM = 1
@@ -215,8 +310,6 @@ alias AI_ALL = 16
 alias AI_ADDRCONFIG = 32
 alias AI_IDN = 64
 
-alias INET_ADDRSTRLEN = 16
-alias INET6_ADDRSTRLEN = 46
 
 alias SHUT_RD = 0
 alias SHUT_WR = 1
@@ -420,10 +513,10 @@ fn ntohs(netshort: c_ushort) -> c_ushort:
 
 fn _inet_ntop(
     af: c_int,
-    src: UnsafePointer[c_void],
+    src: UnsafePointer[c_void, mut=False],
     dst: UnsafePointer[c_char],
     size: socklen_t,
-) raises -> UnsafePointer[c_char]:
+) raises -> UnsafePointer[c_char, mut=False]:
     """Libc POSIX `inet_ntop` function.
 
     Args:
@@ -445,17 +538,15 @@ fn _inet_ntop(
     """
     return external_call[
         "inet_ntop",
-        UnsafePointer[c_char],  # FnName, RetType
+        UnsafePointer[c_char, mut=False],  # FnName, RetType
         c_int,
-        UnsafePointer[c_void],
+        UnsafePointer[c_void, mut=False],
         UnsafePointer[c_char],
         socklen_t,  # Args
     ](af, src, dst, size)
 
 
-fn inet_ntop[
-    address_family: Int32, address_length: Int
-](ip_address: UInt32,) raises -> String:
+fn inet_ntop[address_family: AddressFamily, address_length: AddressLength](ip_address: UInt32) raises -> String:
     """Libc POSIX `inet_ntop` function.
 
     Parameters:
@@ -479,26 +570,29 @@ fn inet_ntop[
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/inet_ntop.3p.html .
+    * Reference: https://man7.org/linux/man-pages/man3/inet_ntop.3p.html.
     """
     constrained[
-        Int(address_family) in [AF_INET, AF_INET6], "Address family must be either INET_ADDRSTRLEN or INET6_ADDRSTRLEN."
+        address_family in [AddressFamily.AF_INET, AddressFamily.AF_INET6],
+        "Address family must be either AF_INET or AF_INET6.",
     ]()
-    constrained[
-        address_length in [INET_ADDRSTRLEN, INET6_ADDRSTRLEN],
-        "Address family must be either INET_ADDRSTRLEN or INET6_ADDRSTRLEN.",
-    ]()
-    var dst = String(capacity=address_length)
+
+    # TODO: For some reason, using a pointer instead of a String here leads to a "tried to free invalid ptr crash".
+    # Ideally we should try not to modify private members of the String.
+    var dst = String(capacity=address_length.value)
     var result = _inet_ntop(
-        address_family, UnsafePointer.address_of(ip_address).bitcast[c_void](), dst.unsafe_ptr(), address_length
+        address_family.value,
+        UnsafePointer.address_of(ip_address).bitcast[c_void](),
+        dst.unsafe_ptr(),
+        address_length.value,
     )
 
     var i = 0
-    while i <= address_length:
+    while i <= address_length.value:
         if result[i] == 0:
             break
         i += 1
-    dst._buffer.size = i + 1  # Need to modify internal buffer's size for the string to be valid.
+    dst._buffer._len = i + 1
 
     # `inet_ntop` returns NULL on error.
     if not result:
@@ -514,10 +608,10 @@ fn inet_ntop[
             raise Error("inet_ntop Error: An error occurred while converting the address. Error code: " + String(errno))
 
     # We want the string representation of the address, so it's ok to take ownership of the pointer here.
-    return dst
+    return dst^
 
 
-fn _inet_pton(af: c_int, src: UnsafePointer[c_char], dst: UnsafePointer[c_void]) -> c_int:
+fn _inet_pton(af: c_int, src: UnsafePointer[c_char, mut=False], dst: UnsafePointer[c_void]) -> c_int:
     """Libc POSIX `inet_pton` function. Converts a presentation format address (that is, printable form as held in a character string)
     to network format (usually a struct in_addr or some other internal binary representation, in network byte order).
     It returns 1 if the address was valid for the specified address family, or 0 if the address was not parseable in the specified address family,
@@ -543,12 +637,12 @@ fn _inet_pton(af: c_int, src: UnsafePointer[c_char], dst: UnsafePointer[c_void])
         "inet_pton",
         c_int,
         c_int,
-        UnsafePointer[c_char],
+        UnsafePointer[c_char, mut=False],
         UnsafePointer[c_void],
     ](af, src, dst)
 
 
-fn inet_pton[address_family: Int32](src: UnsafePointer[c_char]) raises -> c_uint:
+fn inet_pton[address_family: AddressFamily](src: UnsafePointer[c_char, mut=False]) raises -> c_uint:
     """Libc POSIX `inet_pton` function. Converts a presentation format address (that is, printable form as held in a character string)
     to network format (usually a struct in_addr or some other internal binary representation, in network byte order).
 
@@ -573,21 +667,24 @@ fn inet_pton[address_family: Int32](src: UnsafePointer[c_char]) raises -> c_uint
     * Reference: https://man7.org/linux/man-pages/man3/inet_ntop.3p.html .
     * This function is valid for `AF_INET` and `AF_INET6`.
     """
-    constrained[Int(address_family) in [AF_INET, AF_INET6], "Address family must be either AF_INET or AF_INET6."]()
+    constrained[
+        address_family in [AddressFamily.AF_INET, AddressFamily.AF_INET6],
+        "Address family must be either AF_INET or AF_INET6.",
+    ]()
     var ip_buffer: UnsafePointer[c_void]
 
     @parameter
-    if address_family == AF_INET6:
+    if address_family == AddressFamily.AF_INET6:
         ip_buffer = stack_allocation[16, c_void]()
     else:
         ip_buffer = stack_allocation[4, c_void]()
 
-    var result = _inet_pton(address_family, src, ip_buffer)
+    var result = _inet_pton(address_family.value, src, ip_buffer)
     if result == 0:
         raise Error("inet_pton Error: The input is not a valid address.")
     elif result == -1:
         var errno = get_errno()
-        raise Error("inet_pton Error: An error occurred while converting the address. Error code: " + String(errno))
+        raise Error("inet_pton Error: An error occurred while converting the address. Error code: ", errno)
 
     return ip_buffer.bitcast[c_uint]().take_pointee()
 
@@ -681,7 +778,7 @@ fn socket(domain: c_int, type: c_int, protocol: c_int) raises -> c_int:
 
 
 fn _setsockopt[
-    origin: Origin
+    origin: ImmutableOrigin
 ](
     socket: c_int,
     level: c_int,
@@ -775,7 +872,7 @@ fn _getsockopt[
     socket: c_int,
     level: c_int,
     option_name: c_int,
-    option_value: UnsafePointer[c_void],
+    option_value: UnsafePointer[c_void, mut=False],
     option_len: Pointer[socklen_t, len_origin],
 ) -> c_int:
     """Libc POSIX `setsockopt` function.
@@ -804,7 +901,7 @@ fn _getsockopt[
         c_int,
         c_int,
         c_int,
-        UnsafePointer[c_void],
+        UnsafePointer[c_void, mut=False],
         Pointer[socklen_t, len_origin],  # Args
     ](socket, level, option_name, option_value, option_len)
 
@@ -1016,8 +1113,11 @@ fn getpeername(file_descriptor: c_int) raises -> sockaddr_in:
     return remote_address.bitcast[sockaddr_in]().take_pointee()
 
 
-fn _bind[origin: MutableOrigin](socket: c_int, address: Pointer[sockaddr_in, origin], address_len: socklen_t) -> c_int:
-    """Libc POSIX `bind` function.
+fn _bind[
+    origin: ImmutableOrigin
+](socket: c_int, address: Pointer[sockaddr_in, origin], address_len: socklen_t) -> c_int:
+    """Libc POSIX `bind` function. Assigns the address specified by `address` to the socket referred to by
+       the file descriptor `socket`.
 
     Args:
         socket: A File Descriptor.
@@ -1038,7 +1138,7 @@ fn _bind[origin: MutableOrigin](socket: c_int, address: Pointer[sockaddr_in, ori
     return external_call["bind", c_int, c_int, Pointer[sockaddr_in, origin], socklen_t](socket, address, address_len)
 
 
-fn bind(socket: c_int, mut address: sockaddr_in) raises:
+fn bind(socket: c_int, address: sockaddr_in) raises:
     """Libc POSIX `bind` function.
 
     Args:
@@ -1279,7 +1379,9 @@ fn accept(socket: c_int) raises -> c_int:
     return result
 
 
-fn _connect[origin: Origin](socket: c_int, address: Pointer[sockaddr_in, origin], address_len: socklen_t) -> c_int:
+fn _connect[
+    origin: ImmutableOrigin
+](socket: c_int, address: Pointer[sockaddr_in, origin], address_len: socklen_t) -> c_int:
     """Libc POSIX `connect` function.
 
     Args: socket: A File Descriptor.
@@ -1592,7 +1694,7 @@ fn recvfrom(
     return result
 
 
-fn _send(socket: c_int, buffer: UnsafePointer[c_void], length: c_size_t, flags: c_int) -> c_ssize_t:
+fn _send(socket: c_int, buffer: UnsafePointer[c_void, mut=False], length: c_size_t, flags: c_int) -> c_ssize_t:
     """Libc POSIX `send` function.
 
     Args:
@@ -1615,7 +1717,7 @@ fn _send(socket: c_int, buffer: UnsafePointer[c_void], length: c_size_t, flags: 
     return external_call["send", c_ssize_t](socket, buffer, length, flags)
 
 
-fn send(socket: c_int, buffer: UnsafePointer[c_void], length: c_size_t, flags: c_int) raises -> c_size_t:
+fn send(socket: c_int, buffer: UnsafePointer[c_void, mut=False], length: c_size_t, flags: c_int) raises -> c_size_t:
     """Libc POSIX `send` function.
 
     Args:
@@ -1719,10 +1821,10 @@ fn send(socket: c_int, buffer: UnsafePointer[c_void], length: c_size_t, flags: c
 
 fn _sendto(
     socket: c_int,
-    message: UnsafePointer[c_void],
+    message: UnsafePointer[c_void, mut=False],
     length: c_size_t,
     flags: c_int,
-    dest_addr: UnsafePointer[sockaddr],
+    dest_addr: UnsafePointer[sockaddr, mut=False],
     dest_len: socklen_t,
 ) -> c_ssize_t:
     """Libc POSIX `sendto` function
@@ -1753,7 +1855,14 @@ fn _sendto(
         * `MSG_NOSIGNAL`: Requests not to send the SIGPIPE signal if an attempt to send is made on a stream-oriented socket that is no longer connected. The [EPIPE] error shall still be returned.
     """
     return external_call[
-        "sendto", c_ssize_t, c_int, UnsafePointer[c_char], c_size_t, c_int, UnsafePointer[sockaddr], socklen_t
+        "sendto",
+        c_ssize_t,
+        c_int,
+        UnsafePointer[c_char, mut=False],
+        c_size_t,
+        c_int,
+        UnsafePointer[sockaddr, mut=False],
+        socklen_t,
     ](socket, message, length, flags, dest_addr, dest_len)
 
 
@@ -1931,7 +2040,7 @@ fn shutdown(socket: c_int, how: c_int) raises:
             )
 
 
-fn gai_strerror(ecode: c_int) -> UnsafePointer[c_char]:
+fn gai_strerror(ecode: c_int) -> UnsafePointer[c_char, mut=False]:
     """Libc POSIX `gai_strerror` function.
 
     Args:
@@ -1948,7 +2057,7 @@ fn gai_strerror(ecode: c_int) -> UnsafePointer[c_char]:
     #### Notes:
     * Reference: https://man7.org/linux/man-pages/man3/gai_strerror.3p.html .
     """
-    return external_call["gai_strerror", UnsafePointer[c_char], c_int](ecode)
+    return external_call["gai_strerror", UnsafePointer[c_char, mut=False], c_int](ecode)
 
 
 # --- ( File Related Syscalls & Structs )---------------------------------------
