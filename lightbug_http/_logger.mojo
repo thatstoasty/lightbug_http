@@ -16,6 +16,8 @@ fn get_log_level() -> Int:
         The log level.
     """
     alias level = env_get_string["LB_LOG_LEVEL", "INFO"]()
+
+    @parameter
     if level == "INFO":
         return LogLevel.INFO
     elif level == "WARN":

@@ -1,5 +1,3 @@
-from utils import Variant, StringSlice
-from memory import Span
 from collections import Optional, Dict
 from lightbug_http.io.bytes import Bytes, bytes, ByteReader
 from lightbug_http.strings import (

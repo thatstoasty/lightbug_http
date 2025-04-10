@@ -1,5 +1,4 @@
 from collections import Dict, Optional
-from memory import Span
 from lightbug_http.io.bytes import Bytes, ByteReader, ByteWriter, is_newline, is_space
 from lightbug_http.strings import BytesConstant
 from lightbug_http._logger import logger

@@ -7,7 +7,6 @@ from lightbug_http.io.sync import Duration
 from lightbug_http.address import parse_address, TCPAddr, UDPAddr
 from lightbug_http._libc import (
     sockaddr,
-    AF_INET,
     SOCK_DGRAM,
     SO_REUSEADDR,
     socket,

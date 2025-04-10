@@ -11,7 +11,7 @@ from lightbug_http.uri import Scheme
 
 
 @value
-struct PoolKey(Hashable, KeyElement):
+struct PoolKey(Hashable, KeyElement, Writable):
     var host: String
     var port: UInt16
     var scheme: Scheme

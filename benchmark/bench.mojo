@@ -22,7 +22,6 @@ fn run_benchmark():
     try:
         var config = BenchConfig()
         config.verbose_timing = True
-        config.tabular_view = True
         var m = Bench(config)
         m.bench_function[lightbug_benchmark_header_encode](BenchId("HeaderEncode"))
         m.bench_function[lightbug_benchmark_header_parse](BenchId("HeaderParse"))
