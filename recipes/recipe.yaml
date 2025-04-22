@@ -9,7 +9,6 @@ package:
 
 source:
   - path: ../lightbug_http
-  - path: ../external
   - path: ../LICENSE
 
 build:
