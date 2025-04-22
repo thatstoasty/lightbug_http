@@ -1,4 +1,4 @@
-from external.small_time import SmallTime
+from lightbug_http.external.small_time import SmallTime
 
 alias HTTP_DATE_FORMAT = "ddd, DD MMM YYYY HH:mm:ss ZZZ"
 alias TZ_GMT = TimeZone(0, "GMT")
@@ -47,9 +47,9 @@ struct Expiration(CollectionElement):
         if self.variant != other.variant:
             return False
         if self.variant == 1:
-            if bool(self.datetime) != bool(other.datetime):
+            if Bool(self.datetime) != Bool(other.datetime):
                 return False
-            elif not bool(self.datetime) and not bool(other.datetime):
+            elif not Bool(self.datetime) and not Bool(other.datetime):
                 return True
             return self.datetime.value().isoformat() == other.datetime.value().isoformat()
 
