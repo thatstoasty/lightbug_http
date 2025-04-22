@@ -4,7 +4,7 @@ channels = ["conda-forge", "https://conda.modular.com/max", "https://repo.prefix
 description = "Simple and fast HTTP framework for Mojo!"
 name = "lightbug_http"
 platforms = ["osx-arm64", "linux-64", "linux-aarch64"]
-version = "0.1.17"
+version = "0.1.18"
 
 [tasks]
 build = { cmd = "rattler-build build --recipe recipes -c https://conda.modular.com/max -c conda-forge --skip-existing=all", env = {MODULAR_MOJO_IMPORT_PATH = "$CONDA_PREFIX/lib/mojo"} }
@@ -25,7 +25,6 @@ bench_server = { cmd = "bash scripts/bench_server.sh" }
 
 [dependencies]
 max = ">=25.2.0,<25.3.0"
-small_time = ">=25.2.0,<25.3.0"
 
 [feature.integration-tests.dependencies]
 requests = ">=2.32.3,<3"
