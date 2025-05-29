@@ -1,6 +1,5 @@
 from lightbug_http.connection import listen_udp
 from lightbug_http.address import UDPAddr
-from utils import StringSlice
 
 
 fn main() raises:

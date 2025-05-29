@@ -8,6 +8,7 @@ from lightbug_http.socket import Socket
 from lightbug_http._libc import (
     c_int,
     c_char,
+    c_uchar,
     in_addr,
     sockaddr,
     sockaddr_in,
@@ -35,8 +36,8 @@ struct AddressConstants:
     alias EMPTY = ""
 
 
-trait Addr(Stringable, Representable, Writable, EqualityComparableCollectionElement):
-    alias _type: StringLiteral
+trait Addr(Stringable, Representable, Writable, EqualityComparable, Movable, Copyable):
+    alias _type: StaticString
 
     fn __init__(out self):
         ...
@@ -70,7 +71,7 @@ trait AnAddrInfo:
 
 
 @value
-struct NetworkType(EqualityComparableCollectionElement):
+struct NetworkType(EqualityComparable, Movable, Copyable):
     var value: String
 
     alias empty = NetworkType("")
@@ -443,9 +444,7 @@ fn parse_port[origin: ImmutableOrigin](port_str: ByteView[origin]) raises -> UIn
     return UInt16(port)
 
 
-fn parse_address[
-    origin: ImmutableOrigin
-](network: NetworkType, address: ByteView[origin]) raises -> (ByteView[origin], UInt16):
+fn parse_address[origin: ImmutableOrigin](network: NetworkType, address: ByteView[origin]) raises -> (String, UInt16):
     """Parse an address string into a host and port.
 
     Args:
@@ -460,19 +459,18 @@ fn parse_address[
 
     if address == AddressConstants.LOCALHOST.as_bytes():
         if network.is_ipv4():
-            return ByteView[origin].from_static_span(AddressConstants.IPV4_LOCALHOST.as_bytes()), DEFAULT_IP_PORT
+            return String(AddressConstants.IPV4_LOCALHOST), DEFAULT_IP_PORT
         elif network.is_ipv6():
-            return ByteView[origin].from_static_span(AddressConstants.IPV6_LOCALHOST.as_bytes()), DEFAULT_IP_PORT
+            return String(AddressConstants.IPV6_LOCALHOST), DEFAULT_IP_PORT
 
     if network.is_ip_protocol():
-        var host = address
         if network == NetworkType.ip6 and address.find(Byte(ord(":"))) != -1:
-            return host, DEFAULT_IP_PORT
+            return String(address), DEFAULT_IP_PORT
 
         if address.find(Byte(ord(":"))) != -1:
             raise Error("IP protocol addresses should not include ports")
 
-        return host, DEFAULT_IP_PORT
+        return String(address), DEFAULT_IP_PORT
 
     var colon_index = address.rfind(Byte(ord(":")))
     if colon_index == -1:
@@ -497,11 +495,11 @@ fn parse_address[
 
     if host == AddressConstants.LOCALHOST.as_bytes():
         if network.is_ipv4():
-            return ByteView[origin].from_static_span(AddressConstants.IPV4_LOCALHOST.as_bytes()), port
+            return String(AddressConstants.IPV4_LOCALHOST), port
         elif network.is_ipv6():
-            return ByteView[origin].from_static_span(AddressConstants.IPV6_LOCALHOST.as_bytes()), port
+            return String(AddressConstants.IPV6_LOCALHOST), port
 
-    return host, port
+    return String(host), port
 
 
 # TODO: Support IPv6 long form.
@@ -593,7 +591,7 @@ fn _getaddrinfo[
 
 fn getaddrinfo[
     T: AnAddrInfo, //
-](node: String, service: String, hints: T, mut res: UnsafePointer[T],) raises:
+](owned node: String, owned service: String, hints: T, mut res: UnsafePointer[T]) raises:
     """Libc POSIX `getaddrinfo` function.
 
     Args:
@@ -620,22 +618,25 @@ fn getaddrinfo[
     ```
 
     #### Notes:
-    * Reference: https://man7.org/linux/man-pages/man3/getaddrinfo.3p.htm .
+    * Reference: https://man7.org/linux/man-pages/man3/getaddrinfo.3p.html.
     """
     var result = _getaddrinfo(
-        node.unsafe_ptr(), service.unsafe_ptr(), Pointer.address_of(hints), Pointer.address_of(res)
+        node.unsafe_cstr_ptr().origin_cast[mut=False](),
+        service.unsafe_cstr_ptr().origin_cast[mut=False](),
+        Pointer(to=hints),
+        Pointer(to=res),
     )
     if result != 0:
         # gai_strerror returns a char buffer that we don't know the length of.
         # TODO: Perhaps switch to writing bytes once the Writer trait allows writing individual bytes.
         var err = gai_strerror(result)
-        var msg = List[Byte, True]()
+        var msg = String()
         var i = 0
         while err[i] != 0:
-            msg.append(err[i])
             i += 1
-        msg.append(0)
-        raise Error("getaddrinfo: " + String(msg^))
+
+        msg.write_bytes(Span[Byte, __origin_of(err)](ptr=err.bitcast[c_uchar](), length=i))
+        raise Error("getaddrinfo: ", msg)
 
 
 fn freeaddrinfo[T: AnAddrInfo, //](ptr: UnsafePointer[T]):

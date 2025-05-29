@@ -62,7 +62,7 @@ struct Cookie(CollectionElement):
         return cookie
 
     fn __init__(
-        mut self,
+        out self,
         name: String,
         value: String,
         expires: Expiration = Expiration.session(),
@@ -122,7 +122,7 @@ struct Cookie(CollectionElement):
     fn build_header_value(self) -> String:
         var header_value = String.write(self.name, Cookie.EQUAL, self.value)
         if self.expires.is_datetime():
-            var v: Optional[String] = None
+            var v: Optional[String]
             try:
                 v = self.expires.http_date_timestamp()
             except:

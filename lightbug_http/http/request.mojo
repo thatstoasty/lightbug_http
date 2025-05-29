@@ -80,7 +80,7 @@ struct HTTPRequest(Writable, Stringable):
         return request
 
     fn __init__(
-        mut self,
+        out self,
         uri: URI,
         headers: Headers = Headers(),
         cookies: RequestCookieJar = RequestCookieJar(),
@@ -132,7 +132,9 @@ struct HTTPRequest(Writable, Stringable):
             self.body_raw = r.read_bytes(content_length).to_bytes()
             self.set_content_length(len(self.body_raw))
         except OutOfBoundsError:
-            logger.debug("Failed to read full request body as per content-length header. Proceeding with the available bytes.")
+            logger.debug(
+                "Failed to read full request body as per content-length header. Proceeding with the available bytes."
+            )
             var available_bytes = len(r._inner) - r.read_pos
             if available_bytes > 0:
                 self.body_raw = r.read_bytes(available_bytes).to_bytes()
@@ -141,7 +143,6 @@ struct HTTPRequest(Writable, Stringable):
                 logger.debug("No body bytes available. Setting content-length to 0.")
                 self.body_raw = Bytes()
                 self.set_content_length(0)
-
 
     fn write_to[T: Writer, //](self, mut writer: T):
         path = self.uri.path if len(self.uri.path) > 1 else strSlash

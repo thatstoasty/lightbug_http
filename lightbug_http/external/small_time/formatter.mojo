@@ -1,5 +1,5 @@
 # small_time library, courtesy @thatstoasty , 2025
-# https://github.com/thatstoasty/small-time/ 
+# https://github.com/thatstoasty/small-time/
 from collections import InlineArray
 from collections.string import StringSlice
 from utils import StaticTuple
@@ -58,6 +58,7 @@ alias formatter = _Formatter()
 
 struct _Formatter:
     """SmallTime formatter."""
+
     var _sub_chrs: StaticTuple[Int, 128]
     """Substitution characters."""
 
@@ -86,7 +87,7 @@ struct _Formatter:
         Args:
             m: Time value.
             fmt: Format string.
-        
+
         Returns:
             Formatted time string.
         """
@@ -94,7 +95,7 @@ struct _Formatter:
             return ""
 
         var format = fmt.as_string_slice()
-        var result: String = ''
+        var result: String = ""
         var in_bracket = False
         var start = 0
 
@@ -104,27 +105,16 @@ struct _Formatter:
                     result.write("[")
                 else:
                     in_bracket = True
-                
-                # Not sure why stringslice slicing raises,
-                # but fallback to allocating a string and slicing that if it raises.
-                try:
-                    result.write(self.replace(m, format[start:i]))
-                except:
-                    result.write(self.replace(m, fmt[start:i]))
+
+                result.write(self.replace(m, format[start:i]))
 
                 start = i + 1
             elif format[i] == "]":
                 if in_bracket:
-                    try:
-                        result.write(format[start:i])
-                    except:
-                        result.write(fmt[start:i])
+                    result.write(format[start:i])
                     in_bracket = False
                 else:
-                    try:
-                        result.write(format[start:i])
-                    except:
-                        result.write(fmt[start:i])
+                    result.write(format[start:i])
                     result.write("]")
                 start = i + 1
 
@@ -132,10 +122,7 @@ struct _Formatter:
             result.write("[")
 
         if start < len(format):
-            try:
-                result.write(self.replace(m, format[start:]))
-            except:
-                result.write(self.replace(m, fmt[start:]))
+            result.write(self.replace(m, format[start:]))
         return result
 
     fn replace(self, m: SmallTime, fmt: StringSlice) -> String:
@@ -144,14 +131,14 @@ struct _Formatter:
         Args:
             m: Time value.
             fmt: Format string.
-        
+
         Returns:
             Formatted time string.
         """
         if len(fmt) == 0:
             return ""
 
-        var result: String = ''
+        var result: String = ""
         var matched_byte = 0
         var matched_count = 0
         for i in range(len(fmt)):

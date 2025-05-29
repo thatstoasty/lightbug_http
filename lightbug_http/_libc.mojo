@@ -1,6 +1,7 @@
 from utils import StaticTuple
 from sys.ffi import external_call
 from sys.info import sizeof, os_is_windows, os_is_macos, os_is_linux
+from sys._libc import c_char, c_int, c_size_t
 from memory import memcpy, UnsafePointer, stack_allocation
 from lightbug_http.io.bytes import Bytes
 
@@ -18,25 +19,12 @@ alias char_UnsafePointer = UnsafePointer[c_char]
 # Adapted from https://github.com/crisadamo/mojo-Libc . Huge thanks to Cristian!
 # C types
 alias c_void = UInt8
-alias c_char = UInt8
-alias c_schar = Int8
 alias c_uchar = UInt8
-alias c_short = Int16
 alias c_ushort = UInt16
-alias c_int = Int32
 alias c_uint = UInt32
-alias c_long = Int64
-alias c_ulong = UInt64
-alias c_float = Float32
-alias c_double = Float64
 
 # `Int` is known to be machine's width
-alias c_size_t = Int
 alias c_ssize_t = Int
-
-alias ptrdiff_t = Int64
-alias intptr_t = Int64
-alias uintptr_t = UInt64
 
 
 # --- ( error.h Constants )-----------------------------------------------------
@@ -579,20 +567,13 @@ fn inet_ntop[address_family: AddressFamily, address_length: AddressLength](ip_ad
 
     # TODO: For some reason, using a pointer instead of a String here leads to a "tried to free invalid ptr crash".
     # Ideally we should try not to modify private members of the String.
-    var dst = String(capacity=address_length.value)
+    var dst = UnsafePointer[c_char].alloc(address_length.value + 1)
     var result = _inet_ntop(
         address_family.value,
-        UnsafePointer.address_of(ip_address).bitcast[c_void](),
-        dst.unsafe_ptr(),
+        UnsafePointer(to=ip_address).bitcast[c_void](),
+        dst,
         address_length.value,
     )
-
-    var i = 0
-    while i <= address_length.value:
-        if result[i] == 0:
-            break
-        i += 1
-    dst._buffer._len = i + 1
 
     # `inet_ntop` returns NULL on error.
     if not result:
@@ -607,8 +588,14 @@ fn inet_ntop[address_family: AddressFamily, address_length: AddressLength](ip_ad
         else:
             raise Error("inet_ntop Error: An error occurred while converting the address. Error code: " + String(errno))
 
-    # We want the string representation of the address, so it's ok to take ownership of the pointer here.
-    return dst^
+    var i = 0
+    while i <= address_length.value:
+        if result[i] == 0:
+            break
+        i += 1
+
+    # Copy the dst pointer's contents into a new String.
+    return String(StringSlice(ptr=dst.bitcast[c_uchar](), length=i))
 
 
 fn _inet_pton(af: c_int, src: UnsafePointer[c_char, mut=False], dst: UnsafePointer[c_void]) -> c_int:
@@ -642,7 +629,7 @@ fn _inet_pton(af: c_int, src: UnsafePointer[c_char, mut=False], dst: UnsafePoint
     ](af, src, dst)
 
 
-fn inet_pton[address_family: AddressFamily](src: UnsafePointer[c_char, mut=False]) raises -> c_uint:
+fn inet_pton[address_family: AddressFamily](owned src: String) raises -> c_uint:
     """Libc POSIX `inet_pton` function. Converts a presentation format address (that is, printable form as held in a character string)
     to network format (usually a struct in_addr or some other internal binary representation, in network byte order).
 
@@ -679,7 +666,7 @@ fn inet_pton[address_family: AddressFamily](src: UnsafePointer[c_char, mut=False
     else:
         ip_buffer = stack_allocation[4, c_void]()
 
-    var result = _inet_pton(address_family.value, src, ip_buffer)
+    var result = _inet_pton(address_family.value, src.unsafe_cstr_ptr().origin_cast[mut=False](), ip_buffer)
     if result == 0:
         raise Error("inet_pton Error: The input is not a valid address.")
     elif result == -1:
@@ -847,7 +834,7 @@ fn setsockopt(
     #### Notes:
     * Reference: https://man7.org/linux/man-pages/man3/setsockopt.3p.html .
     """
-    var result = _setsockopt(socket, level, option_name, Pointer.address_of(option_value), sizeof[Int]())
+    var result = _setsockopt(socket, level, option_name, Pointer(to=option_value), sizeof[Int]())
     if result == -1:
         var errno = get_errno()
         if errno == EBADF:
@@ -939,7 +926,7 @@ fn getsockopt(
     """
     var option_value = stack_allocation[1, c_void]()
     var option_len: socklen_t = sizeof[Int]()
-    var result = _getsockopt(socket, level, option_name, option_value, Pointer.address_of(option_len))
+    var result = _getsockopt(socket, level, option_name, option_value, Pointer(to=option_len))
     if result == -1:
         var errno = get_errno()
         if errno == EBADF:
@@ -1089,7 +1076,7 @@ fn getpeername(file_descriptor: c_int) raises -> sockaddr_in:
     * Reference: https://man7.org/linux/man-pages/man2/getpeername.2.html .
     """
     var remote_address = stack_allocation[1, sockaddr]()
-    var result = _getpeername(file_descriptor, remote_address, Pointer.address_of(socklen_t(sizeof[sockaddr]())))
+    var result = _getpeername(file_descriptor, remote_address, Pointer(to=socklen_t(sizeof[sockaddr]())))
     if result == -1:
         var errno = get_errno()
         if errno == EBADF:
@@ -1173,7 +1160,7 @@ fn bind(socket: c_int, address: sockaddr_in) raises:
     #### Notes:
     * Reference: https://man7.org/linux/man-pages/man3/bind.3p.html .
     """
-    var result = _bind(socket, Pointer.address_of(address), sizeof[sockaddr_in]())
+    var result = _bind(socket, Pointer(to=address), sizeof[sockaddr_in]())
     if result == -1:
         var errno = get_errno()
         if errno == EACCES:
@@ -1330,7 +1317,7 @@ fn accept(socket: c_int) raises -> c_int:
     * Reference: https://man7.org/linux/man-pages/man3/accept.3p.html .
     """
     var remote_address = sockaddr()
-    var result = _accept(socket, Pointer.address_of(remote_address), Pointer.address_of(socklen_t(sizeof[socklen_t]())))
+    var result = _accept(socket, Pointer(to=remote_address), Pointer(to=socklen_t(sizeof[socklen_t]())))
     if result == -1:
         var errno = get_errno()
         if Int(errno) in [EAGAIN, EWOULDBLOCK]:
@@ -1432,7 +1419,7 @@ fn connect(socket: c_int, address: sockaddr_in) raises:
     #### Notes:
     * Reference: https://man7.org/linux/man-pages/man3/connect.3p.html .
     """
-    var result = _connect(socket, Pointer.address_of(address), sizeof[sockaddr_in]())
+    var result = _connect(socket, Pointer(to=address), sizeof[sockaddr_in]())
     if result == -1:
         var errno = get_errno()
         if errno == EACCES:
@@ -1659,7 +1646,7 @@ fn recvfrom(
         * `MSG_WAITALL`: On SOCK_STREAM sockets this requests that the function block until the full amount of data can be returned. The function may return the smaller amount of data if the socket is a message-based socket, if a signal is caught, if the connection is terminated, if MSG_PEEK was specified, or if an error is pending for the socket.
 
     """
-    var result = _recvfrom(socket, buffer, length, flags, address, Pointer[socklen_t].address_of(sizeof[sockaddr]()))
+    var result = _recvfrom(socket, buffer, length, flags, address, Pointer[socklen_t](to=sizeof[sockaddr]()))
     if result == -1:
         var errno = get_errno()
         if Int(errno) in [EAGAIN, EWOULDBLOCK]:
@@ -1858,7 +1845,7 @@ fn _sendto(
         "sendto",
         c_ssize_t,
         c_int,
-        UnsafePointer[c_char, mut=False],
+        UnsafePointer[c_void, mut=False],
         c_size_t,
         c_int,
         UnsafePointer[sockaddr, mut=False],

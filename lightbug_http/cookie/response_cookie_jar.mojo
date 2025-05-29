@@ -11,7 +11,7 @@ struct ResponseCookieKey(KeyElement):
     var path: String
 
     fn __init__(
-        mut self,
+        out self,
         name: String,
         domain: Optional[String] = Optional[String](None),
         path: Optional[String] = Optional[String](None),

@@ -1,5 +1,3 @@
-from utils import StringSlice
-from testing.testing import Testable
 from memory.span import Span, _SpanIter, UnsafePointer
 from lightbug_http.strings import BytesConstant
 from lightbug_http.connection import default_buffer_size
@@ -64,13 +62,6 @@ struct ByteWriter(Writer):
         self._inner.extend(b^)
 
     @always_inline
-    fn consuming_write(mut self, owned s: String):
-        # kind of cursed but seems to work? pops the null terminator
-        _ = s._buffer.pop()
-        self._inner.extend(s._buffer^)
-        s._buffer = s._buffer_type()
-
-    @always_inline
     fn write_byte(mut self, b: Byte):
         self._inner.append(b)
 
@@ -85,16 +76,10 @@ alias OutOfBoundsError = "Tried to read past the end of the ByteReader."
 
 
 @value
-struct ByteView[origin: Origin](Testable):
+struct ByteView[origin: Origin]:
     """Convenience wrapper around a Span of Bytes."""
 
     var _inner: Span[Byte, origin]
-
-    @staticmethod
-    fn from_static_span(span: Span[Byte, StaticConstantOrigin]) -> ByteView[origin]:
-        var ptr = UnsafePointer[Byte].address_of(span[0])
-        var new_span = Span[Byte, origin](ptr=ptr, length=len(span))
-        return ByteView[origin](new_span)
 
     @implicit
     fn __init__(out self, b: Span[Byte, origin]):

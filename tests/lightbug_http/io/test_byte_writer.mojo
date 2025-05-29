@@ -2,6 +2,7 @@ import testing
 from lightbug_http.io.bytes import Bytes, ByteWriter
 from lightbug_http.strings import to_string
 
+
 def test_write_byte():
     var w = ByteWriter()
     w.write_byte(0x01)
@@ -15,11 +16,10 @@ def test_write_byte():
 def test_consuming_write():
     var w = ByteWriter()
     var my_string: String = "World"
-    w.consuming_write("Hello ")
-    w.consuming_write(my_string^)
-    
+    w.consuming_write(List[Byte, True]("Hello ".as_bytes()))
+    w.consuming_write(List[Byte, True](my_string.as_bytes()))
     var result = w^.consume()
-    
+
     testing.assert_equal(to_string(result), "Hello World")
 
 
@@ -27,4 +27,6 @@ def test_write():
     var w = ByteWriter()
     w.write("Hello", ", ")
     w.write_bytes("World!".as_bytes())
-    testing.assert_equal(to_string(w^.consume()), to_string(Bytes(72, 101, 108, 108, 111, 44, 32, 87, 111, 114, 108, 100, 33)))
+    testing.assert_equal(
+        to_string(w^.consume()), to_string(Bytes(72, 101, 108, 108, 111, 44, 32, 87, 111, 114, 108, 100, 33))
+    )

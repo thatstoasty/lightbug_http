@@ -1,4 +1,3 @@
-from utils import StringSlice
 from memory import Span
 from lightbug_http.io.bytes import Bytes, bytes, byte
 
@@ -54,9 +53,9 @@ fn to_string(owned bytes: Bytes) -> String:
     Args:
         bytes: The List of bytes to convert to a String.
     """
-    if bytes[-1] != 0:
-        bytes.append(0)
-    return String(bytes^)
+    var result = String()
+    result.write_bytes(bytes)
+    return result^
 
 
 fn find_all(s: String, sub_str: String) -> List[Int]:

@@ -21,32 +21,28 @@ fn unquote[expand_plus: Bool = False](input_str: String, disallowed_escapes: Lis
         return encoded_str
 
     var sub_strings = List[String]()
-
     var current_idx = 0
     var slice_start = 0
-    var slice_end = 0
 
     var str_bytes = List[UInt8]()
     while current_idx < len(percent_idxs):
-        slice_end = percent_idxs[current_idx]
+        var slice_end = percent_idxs[current_idx]
         sub_strings.append(encoded_str[slice_start:slice_end])
 
         var current_offset = slice_end
         while current_idx < len(percent_idxs):
-            var char_byte = -1
-            if (current_offset + 3) <= len(encoded_str):
-                try:
-                    char_byte = atol(
-                        encoded_str[current_offset + 1 : current_offset + 3],
-                        base=16,
-                    )
-                except:
-                    pass
-
-            if char_byte < 0:
+            if (current_offset + 3) > len(encoded_str):
+                # If the percent escape is not followed by two hex digits, we stop processing.
                 break
 
-            str_bytes.append(char_byte)
+            try:
+                char_byte = atol(
+                    encoded_str[current_offset + 1 : current_offset + 3],
+                    base=16,
+                )
+                str_bytes.append(char_byte)
+            except:
+                break
 
             if percent_idxs[current_idx + 1] != (current_offset + 3):
                 current_offset += 3
@@ -56,8 +52,8 @@ fn unquote[expand_plus: Bool = False](input_str: String, disallowed_escapes: Lis
             current_offset = percent_idxs[current_idx]
 
         if len(str_bytes) > 0:
-            str_bytes.append(0x00)
-            var sub_str_from_bytes = String(Bytes(str_bytes))
+            var sub_str_from_bytes = String()
+            sub_str_from_bytes.write_bytes(str_bytes)
             for disallowed in disallowed_escapes:
                 sub_str_from_bytes = sub_str_from_bytes.replace(disallowed[], "")
             sub_strings.append(sub_str_from_bytes)
@@ -68,7 +64,7 @@ fn unquote[expand_plus: Bool = False](input_str: String, disallowed_escapes: Lis
 
     sub_strings.append(encoded_str[slice_start:])
 
-    return String("").join(sub_strings)
+    return StaticString("").join(sub_strings)
 
 
 alias QueryMap = Dict[String, String]
@@ -156,9 +152,9 @@ struct URI(Writable, Stringable, Representable):
                 raise Error("URI.parse: Invalid URI format, scheme should be followed by `://`. Received: " + uri)
 
         # Parse the user info, if exists.
-        var user_info: String = ""
+        # TODO (@thatstoasty): Store the user information (username and password) if it exists.
         if ord(URIDelimiters.AUTHORITY) in reader:
-            user_info = String(reader.read_until(ord(URIDelimiters.AUTHORITY)))
+            _ = reader.read_until(ord(URIDelimiters.AUTHORITY))
             reader.increment(1)
 
         # TODOs (@thatstoasty)

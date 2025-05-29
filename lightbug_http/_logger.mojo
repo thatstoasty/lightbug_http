@@ -1,4 +1,5 @@
 from sys.param_env import env_get_string
+from sys import stdout, stderr
 
 
 struct LogLevel:
@@ -47,9 +48,6 @@ mojo ... -D LB_LOG_LEVEL=DEBUG
 
 @value
 struct Logger[level: Int]:
-    alias STDOUT = 1
-    alias STDERR = 2
-
     fn _log_message[event_level: Int](self, message: String):
         @parameter
         if level >= event_level:
@@ -57,7 +55,7 @@ struct Logger[level: Int]:
             @parameter
             if event_level < LogLevel.WARN:
                 # Write to stderr if FATAL or ERROR
-                print(message, file=Self.STDERR)
+                print(message, file=stderr)
             else:
                 print(message)
 

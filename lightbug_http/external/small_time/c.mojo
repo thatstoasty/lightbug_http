@@ -1,5 +1,5 @@
 # small_time library, courtesy @thatstoasty , 2025
-# https://github.com/thatstoasty/small-time/ 
+# https://github.com/thatstoasty/small-time/
 from sys import external_call
 from sys.ffi import c_uchar
 from memory import UnsafePointer, Pointer, stack_allocation
@@ -8,6 +8,7 @@ from memory import UnsafePointer, Pointer, stack_allocation
 @register_passable("trivial")
 struct TimeVal:
     """Time value."""
+
     var tv_sec: Int
     """Seconds."""
     var tv_usec: Int
@@ -15,7 +16,7 @@ struct TimeVal:
 
     fn __init__(out self, tv_sec: Int = 0, tv_usec: Int = 0):
         """Initializes a new time value.
-        
+
         Args:
             tv_sec: Seconds.
             tv_usec: Microseconds.
@@ -65,7 +66,7 @@ struct Tm:
 
 fn gettimeofday() -> TimeVal:
     """Gets the current time. It's a wrapper around libc `gettimeofday`.
-    
+
     Returns:
         Current time.
     """
@@ -76,12 +77,12 @@ fn gettimeofday() -> TimeVal:
 
 fn time() -> Int:
     """Returns the current time in seconds since the Epoch.
-    
+
     Returns:
         Current time in seconds.
     """
     var time = 0
-    return external_call["time", Int](Pointer.address_of(time))
+    return external_call["time", Int](Pointer(to=time))
 
 
 fn localtime(owned tv_sec: Int) -> Tm:
@@ -89,11 +90,11 @@ fn localtime(owned tv_sec: Int) -> Tm:
 
     Args:
         tv_sec: Time value in seconds since the Epoch.
-    
+
     Returns:
         Broken down local time.
     """
-    return external_call["localtime", UnsafePointer[Tm]](UnsafePointer.address_of(tv_sec)).take_pointee()
+    return external_call["localtime", UnsafePointer[Tm]](UnsafePointer(to=tv_sec)).take_pointee()
 
 
 fn strptime(time_str: String, time_format: String) -> Tm:
@@ -102,28 +103,24 @@ fn strptime(time_str: String, time_format: String) -> Tm:
     Args:
         time_str: Time string.
         time_format: Time format string.
-    
+
     Returns:
         Broken down time.
     """
     var tm = stack_allocation[1, Tm]()
-    _ = external_call[
-        "strptime",
-        NoneType,
-        UnsafePointer[c_uchar],
-        UnsafePointer[c_uchar],
-        UnsafePointer[Tm]
-    ](time_str.unsafe_ptr(), time_format.unsafe_ptr(), tm)
+    _ = external_call["strptime", NoneType, UnsafePointer[c_uchar], UnsafePointer[c_uchar], UnsafePointer[Tm]](
+        time_str.unsafe_ptr(), time_format.unsafe_ptr(), tm
+    )
     return tm.take_pointee()
 
 
 fn gmtime(owned tv_sec: Int) -> Tm:
     """Converts a time value to a broken-down UTC time.
-    
+
     Args:
         tv_sec: Time value in seconds since the Epoch.
-    
+
     Returns:
         Broken down UTC time.
     """
-    return external_call["gmtime", UnsafePointer[Tm]](Pointer.address_of(tv_sec)).take_pointee()
+    return external_call["gmtime", UnsafePointer[Tm]](Pointer(to=tv_sec)).take_pointee()

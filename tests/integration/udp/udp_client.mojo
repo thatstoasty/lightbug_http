@@ -1,8 +1,8 @@
 from lightbug_http.connection import dial_udp
 from lightbug_http.address import UDPAddr
-from utils import StringSlice
 
 alias test_string = "Hello, lightbug!"
+
 
 fn main() raises:
     print("Dialing UDP server...")

@@ -1,4 +1,4 @@
-from memory import Span, stack_allocation
+from memory import stack_allocation
 from utils import StaticTuple
 from sys import sizeof, external_call
 from sys.info import os_is_macos
@@ -309,7 +309,7 @@ struct Socket[AddrType: Addr, address_family: AddressFamily = AddressFamily.AF_I
         """
         var binary_ip: c_uint
         try:
-            binary_ip = inet_pton[address_family](address.unsafe_ptr())
+            binary_ip = inet_pton[address_family](address)
         except e:
             logger.error(e)
             raise Error("ListenConfig.listen: Failed to convert IP address to binary form.")
@@ -346,7 +346,7 @@ struct Socket[AddrType: Addr, address_family: AddressFamily = AddressFamily.AF_I
             getsockname(
                 self.fd,
                 local_address,
-                Pointer.address_of(socklen_t(sizeof[sockaddr]())),
+                Pointer(to=socklen_t(sizeof[sockaddr]())),
             )
         except e:
             logger.error(e)
@@ -509,7 +509,7 @@ struct Socket[AddrType: Addr, address_family: AddressFamily = AddressFamily.AF_I
             ip = addrinfo_unix().get_ip_address(address)
 
         var addr = sockaddr_in(address_family=Int(address_family.value), port=port, binary_ip=ip.s_addr)
-        bytes_sent = sendto(self.fd, src.unsafe_ptr(), len(src), 0, UnsafePointer.address_of(addr).bitcast[sockaddr]())
+        bytes_sent = sendto(self.fd, src.unsafe_ptr(), len(src), 0, UnsafePointer(to=addr).bitcast[sockaddr]())
 
         return bytes_sent
 

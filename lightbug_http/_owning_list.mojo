@@ -7,12 +7,6 @@ from memory import Pointer, UnsafePointer, memcpy, Span
 from collections import Optional
 
 
-trait EqualityComparableMovable(EqualityComparable, Movable):
-    """A trait for types that are both `EqualityComparable` and `Movable`."""
-
-    ...
-
-
 # ===-----------------------------------------------------------------------===#
 # List
 # ===-----------------------------------------------------------------------===#
@@ -48,10 +42,10 @@ struct _OwningListIter[
         @parameter
         if forward:
             self.index += 1
-            return Pointer.address_of(self.src[][self.index - 1])
+            return Pointer(to=self.src[][self.index - 1])
         else:
             self.index -= 1
-            return Pointer.address_of(self.src[][self.index])
+            return Pointer(to=self.src[][self.index])
 
     @always_inline
     fn __has_next__(self) -> Bool:
@@ -123,7 +117,7 @@ struct OwningList[T: Movable](Movable, Sized, Boolable):
     # Operator dunders
     # ===-------------------------------------------------------------------===#
 
-    fn __contains__[U: EqualityComparableMovable, //](self: OwningList[U, *_], value: U) -> Bool:
+    fn __contains__[U: EqualityComparable & Movable, //](self: OwningList[U, *_], value: U) -> Bool:
         """Verify if a given value is present in the list.
 
         Parameters:
@@ -147,7 +141,7 @@ struct OwningList[T: Movable](Movable, Sized, Boolable):
         Returns:
             An iterator of immutable references to the list elements.
         """
-        return _OwningListIter(0, Pointer.address_of(self))
+        return _OwningListIter(0, Pointer(to=self))
 
     # ===-------------------------------------------------------------------===#
     # Trait implementations
@@ -170,7 +164,7 @@ struct OwningList[T: Movable](Movable, Sized, Boolable):
         return len(self) > 0
 
     @no_inline
-    fn __str__[U: RepresentableCollectionElement, //](self: OwningList[U, *_]) -> String:
+    fn __str__[U: Representable & Movable, //](self: OwningList[U, *_]) -> String:
         """Returns a string representation of a `List`.
 
         When the compiler supports conditional methods, then a simple `String(my_list)` will
@@ -180,7 +174,7 @@ struct OwningList[T: Movable](Movable, Sized, Boolable):
 
         Parameters:
             U: The type of the elements in the list. Must implement the
-              traits `Representable` and `CollectionElement`.
+              traits `Representable` and `Movable`.
 
         Returns:
             A string representation of the list.
@@ -190,12 +184,12 @@ struct OwningList[T: Movable](Movable, Sized, Boolable):
         return output^
 
     @no_inline
-    fn write_to[W: Writer, U: RepresentableCollectionElement, //](self: OwningList[U, *_], mut writer: W):
+    fn write_to[W: Writer, U: Representable & Movable, //](self: OwningList[U, *_], mut writer: W):
         """Write `my_list.__str__()` to a `Writer`.
 
         Parameters:
             W: A type conforming to the Writable trait.
-            U: The type of the List elements. Must have the trait `RepresentableCollectionElement`.
+            U: The type of the List elements. Must have the trait `Representable & Movable`.
 
         Args:
             writer: The object to write to.
@@ -208,7 +202,7 @@ struct OwningList[T: Movable](Movable, Sized, Boolable):
         writer.write("]")
 
     @no_inline
-    fn __repr__[U: RepresentableCollectionElement, //](self: OwningList[U, *_]) -> String:
+    fn __repr__[U: Representable & Movable & Copyable, //](self: OwningList[U, *_]) -> String:
         """Returns a string representation of a `List`.
 
         Note that since we can't condition methods on a trait yet,
@@ -399,7 +393,7 @@ struct OwningList[T: Movable](Movable, Sized, Boolable):
 
     # TODO: Remove explicit self type when issue 1876 is resolved.
     fn index[
-        C: EqualityComparableMovable, //
+        C: EqualityComparable & Movable, //
     ](ref self: OwningList[C, *_], value: C, start: Int = 0, stop: Optional[Int] = None,) raises -> Int:
         """
         Returns the index of the first occurrence of a value in a list
@@ -419,7 +413,7 @@ struct OwningList[T: Movable](Movable, Sized, Boolable):
 
         Parameters:
             C: The type of the elements in the list. Must implement the
-                `EqualityComparableMovable` trait.
+                `EqualityComparable & Movable` trait.
 
         Returns:
             The index of the first occurrence of the value in the list.

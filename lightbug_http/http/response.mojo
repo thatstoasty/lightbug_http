@@ -1,4 +1,3 @@
-from utils import StringSlice
 from collections import Optional
 from lightbug_http.external.small_time.small_time import now
 from lightbug_http.uri import URI
@@ -109,7 +108,7 @@ struct HTTPResponse(Writable, Stringable):
                     ):
                         break
 
-                    buff.resize(0)
+                    buff.clear()
                 response.read_chunks(b)
                 return response
             except e:
@@ -124,7 +123,7 @@ struct HTTPResponse(Writable, Stringable):
             raise Error("Failed to read request body: ")
 
     fn __init__(
-        mut self,
+        out self,
         body_bytes: Span[Byte],
         headers: Headers = Headers(),
         cookies: ResponseCookieJar = ResponseCookieJar(),
@@ -152,7 +151,7 @@ struct HTTPResponse(Writable, Stringable):
                 logger.debug("DATE header not set, unable to get current time and it was instead omitted.")
 
     fn __init__(
-        mut self,
+        out self,
         mut reader: ByteReader,
         headers: Headers = Headers(),
         cookies: ResponseCookieJar = ResponseCookieJar(),

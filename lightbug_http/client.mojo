@@ -1,6 +1,4 @@
 from collections import Dict
-from utils import StringSlice
-from memory import UnsafePointer
 from lightbug_http.connection import TCPConnection, default_buffer_size, create_connection
 from lightbug_http.http import HTTPRequest, HTTPResponse, encode
 from lightbug_http.header import Headers, HeaderKey
@@ -55,10 +53,11 @@ struct Client:
         if request.uri.host == "":
             raise Error("Client.do: Host must not be empty.")
 
-        var is_tls = False
+        # TODO (@thatstoasty): Implement TLS support.
+        # var is_tls = False
         var scheme = Scheme.HTTP
         if request.uri.is_https():
-            is_tls = True
+            # is_tls = True
             scheme = Scheme.HTTPS
 
         var port: UInt16

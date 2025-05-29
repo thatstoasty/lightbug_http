@@ -1,4 +1,3 @@
-from utils import StringSlice
 import testing
 from lightbug_http.uri import URI
 from lightbug_http.strings import empty_string, to_string
