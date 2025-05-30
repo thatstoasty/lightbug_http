@@ -1,7 +1,7 @@
 from utils import StaticTuple
 from sys.ffi import external_call
 from sys.info import sizeof, os_is_windows, os_is_macos, os_is_linux
-from sys.ffi import c_char, c_int, c_size_t, c_uchar, c_ushort
+from sys.ffi import c_char, c_int, c_size_t, c_ssize_t, c_uchar, c_ushort, c_uint
 from memory import memcpy, UnsafePointer, stack_allocation
 from lightbug_http.io.bytes import Bytes
 
@@ -14,17 +14,9 @@ alias EPROTONOSUPPORT = 93
 alias SUCCESS = 0
 alias GRND_NONBLOCK: UInt8 = 1
 
-alias char_UnsafePointer = UnsafePointer[c_char]
-
 # Adapted from https://github.com/crisadamo/mojo-Libc . Huge thanks to Cristian!
 # C types
 alias c_void = UInt8
-alias c_uchar = UInt8
-alias c_ushort = UInt16
-alias c_uint = UInt32
-
-# `Int` is known to be machine's width
-alias c_ssize_t = Int
 
 
 # --- ( error.h Constants )-----------------------------------------------------
