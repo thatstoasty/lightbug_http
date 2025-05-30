@@ -202,7 +202,7 @@ struct OwningList[T: Movable](Movable, Sized, Boolable):
         writer.write("]")
 
     @no_inline
-    fn __repr__[U: Representable & Movable & Copyable, //](self: OwningList[U, *_]) -> String:
+    fn __repr__[U: Representable & Movable, //](self: OwningList[U, *_]) -> String:
         """Returns a string representation of a `List`.
 
         Note that since we can't condition methods on a trait yet,
@@ -220,7 +220,7 @@ struct OwningList[T: Movable](Movable, Sized, Boolable):
 
         Parameters:
             U: The type of the elements in the list. Must implement the
-              traits `Representable` and `CollectionElement`.
+              traits `Representable` and `Movable`.
 
         Returns:
             A string representation of the list.
