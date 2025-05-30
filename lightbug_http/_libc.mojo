@@ -1,7 +1,7 @@
 from utils import StaticTuple
 from sys.ffi import external_call
 from sys.info import sizeof, os_is_windows, os_is_macos, os_is_linux
-from sys._libc import c_char, c_int, c_size_t
+from sys.ffi import c_char, c_int, c_size_t, c_uchar, c_ushort
 from memory import memcpy, UnsafePointer, stack_allocation
 from lightbug_http.io.bytes import Bytes
 
