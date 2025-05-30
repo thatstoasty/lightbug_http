@@ -628,7 +628,6 @@ fn getaddrinfo[
     )
     if result != 0:
         # gai_strerror returns a char buffer that we don't know the length of.
-        # TODO: Perhaps switch to writing bytes once the Writer trait allows writing individual bytes.
         var err = gai_strerror(result)
         var msg = String()
         var i = 0
