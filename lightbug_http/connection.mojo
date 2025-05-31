@@ -88,7 +88,7 @@ struct ListenConfig:
         self._keep_alive = keep_alive
 
     fn listen[network: NetworkType = NetworkType.tcp4](mut self, address: String) raises -> NoTLSListener:
-        var local = parse_address[__origin_of(address)](network, address.as_bytes())
+        var local = parse_address[__origin_of(address)](network, address)
         var addr = TCPAddr(String(local[0]), local[1])
         var socket: Socket[TCPAddr]
         try:
@@ -328,7 +328,7 @@ fn listen_udp[network: NetworkType = NetworkType.udp4](local_address: String) ra
     Raises:
         Error: If the address is invalid or failed to bind the socket.
     """
-    var address = parse_address(NetworkType.udp4, local_address.as_bytes())
+    var address = parse_address(NetworkType.udp4, local_address)
     return listen_udp[network](UDPAddr[network](String(address[0]), address[1]))
 
 
@@ -375,7 +375,7 @@ fn dial_udp[network: NetworkType = NetworkType.udp4](local_address: String) rais
     Raises:
         Error: If the network type is not supported or failed to connect to the address.
     """
-    var address = parse_address(network, local_address.as_bytes())
+    var address = parse_address(network, local_address)
     return dial_udp[network](UDPAddr[network](String(address[0]), address[1]))
 
 

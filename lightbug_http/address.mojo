@@ -2,7 +2,6 @@ from memory import UnsafePointer, Span
 from collections import Optional
 from sys.ffi import external_call, OpaquePointer
 from lightbug_http.strings import to_string
-from lightbug_http.io.bytes import ByteView
 from lightbug_http._logger import logger
 from lightbug_http.socket import Socket
 from lightbug_http._libc import (
@@ -392,16 +391,16 @@ fn is_ipv6(network: NetworkType) -> Bool:
 
 fn parse_ipv6_bracketed_address[
     origin: ImmutableOrigin
-](address: ByteView[origin]) raises -> (ByteView[origin], UInt16):
+](address: StringSlice[origin]) raises -> (StringSlice[origin], UInt16):
     """Parse an IPv6 address enclosed in brackets.
 
     Returns:
         Tuple of (host, colon_index_offset).
     """
-    if address[0] != Byte(ord("[")):
+    if address[0] != "[":
         return address, UInt16(0)
 
-    var end_bracket_index = address.find(Byte(ord("]")))
+    var end_bracket_index = address.find("]")
     if end_bracket_index == -1:
         raise Error("missing ']' in address")
 
@@ -409,7 +408,7 @@ fn parse_ipv6_bracketed_address[
         raise MissingPortError
 
     var colon_index = end_bracket_index + 1
-    if address[colon_index] != Byte(ord(":")):
+    if address[colon_index] != ":":
         raise MissingPortError
 
     return (address[1:end_bracket_index], UInt16(end_bracket_index + 1))
@@ -417,24 +416,24 @@ fn parse_ipv6_bracketed_address[
 
 fn validate_no_brackets[
     origin: ImmutableOrigin
-](address: ByteView[origin], start_idx: UInt16, end_idx: Optional[UInt16] = None) raises:
+](address: StringSlice[origin], start_idx: UInt16, end_idx: Optional[UInt16] = None) raises:
     """Validate that the address segment contains no brackets."""
-    var segment: ByteView[origin]
+    var segment: StringSlice[origin]
 
     if end_idx is None:
         segment = address[Int(start_idx) :]
     else:
         segment = address[Int(start_idx) : Int(end_idx.value())]
 
-    if segment.find(Byte(ord("["))) != -1:
+    if segment.find("[") != -1:
         raise Error("unexpected '[' in address")
-    if segment.find(Byte(ord("]"))) != -1:
+    if segment.find("]") != -1:
         raise Error("unexpected ']' in address")
 
 
-fn parse_port[origin: ImmutableOrigin](port_str: ByteView[origin]) raises -> UInt16:
+fn parse_port[origin: ImmutableOrigin](port_str: StringSlice[origin]) raises -> UInt16:
     """Parse and validate port number."""
-    if port_str == AddressConstants.EMPTY.as_bytes():
+    if port_str == AddressConstants.EMPTY:
         raise MissingPortError
 
     var port = Int(String(port_str))
@@ -444,7 +443,7 @@ fn parse_port[origin: ImmutableOrigin](port_str: ByteView[origin]) raises -> UIn
     return UInt16(port)
 
 
-fn parse_address[origin: ImmutableOrigin](network: NetworkType, address: ByteView[origin]) raises -> (String, UInt16):
+fn parse_address[origin: ImmutableOrigin](network: NetworkType, address: StringSlice[origin]) raises -> (String, UInt16):
     """Parse an address string into a host and port.
 
     Args:
@@ -454,32 +453,32 @@ fn parse_address[origin: ImmutableOrigin](network: NetworkType, address: ByteVie
     Returns:
         Tuple containing the host and port.
     """
-    if address == AddressConstants.EMPTY.as_bytes():
+    if address == AddressConstants.EMPTY:
         raise Error("missing host")
 
-    if address == AddressConstants.LOCALHOST.as_bytes():
+    if address == AddressConstants.LOCALHOST:
         if network.is_ipv4():
             return String(AddressConstants.IPV4_LOCALHOST), DEFAULT_IP_PORT
         elif network.is_ipv6():
             return String(AddressConstants.IPV6_LOCALHOST), DEFAULT_IP_PORT
 
     if network.is_ip_protocol():
-        if network == NetworkType.ip6 and address.find(Byte(ord(":"))) != -1:
+        if network == NetworkType.ip6 and address.find(":") != -1:
             return String(address), DEFAULT_IP_PORT
 
-        if address.find(Byte(ord(":"))) != -1:
+        if address.find(":") != -1:
             raise Error("IP protocol addresses should not include ports")
 
         return String(address), DEFAULT_IP_PORT
 
-    var colon_index = address.rfind(Byte(ord(":")))
+    var colon_index = address.rfind(":")
     if colon_index == -1:
         raise MissingPortError
 
-    var host: ByteView[origin]
+    var host: StringSlice[origin]
     var port: UInt16
 
-    if address[0] == Byte(ord("[")):
+    if address[0] == "[":
         try:
             var bracket_offset: UInt16
             (host, bracket_offset) = parse_ipv6_bracketed_address(address)
@@ -488,19 +487,18 @@ fn parse_address[origin: ImmutableOrigin](network: NetworkType, address: ByteVie
             raise e
     else:
         host = address[:colon_index]
-        if host.find(Byte(ord(":"))) != -1:
+        if host.find(":") != -1:
             raise TooManyColonsError
 
     port = parse_port(address[colon_index + 1 :])
 
-    if host == AddressConstants.LOCALHOST.as_bytes():
+    if host == AddressConstants.LOCALHOST:
         if network.is_ipv4():
             return String(AddressConstants.IPV4_LOCALHOST), port
         elif network.is_ipv6():
             return String(AddressConstants.IPV6_LOCALHOST), port
 
     return String(host), port
-
 
 # TODO: Support IPv6 long form.
 fn join_host_port(host: String, port: String) -> String:
